@@ -3,7 +3,7 @@
 **This file is ground truth for grading the exploratory-tester tool. It must never be read by exploratory-tester/ — only `comparison/` may reference it, and only after a tester run already exists.**
 
 Golden reference page: `index.html`  
-Total seeded faults: **40**
+Total seeded faults: **41**
 
 ---
 
@@ -58,7 +58,7 @@ Total seeded faults: **40**
 - **What it is:** The field is labeled 'Weight (kg)' but its placeholder/example text reads 'e.g. 12 lbs' — a unit mismatch.
 - **Technical detail:** public/new-item.html: the weight input's placeholder says "e.g. 12 lbs" directly under a "Weight (kg)" hint label.
 
-## History (3)
+## History (4)
 
 ### H-01 — Copyright year hardcoded to 2019 everywhere except Home
 - **Page(s):** catalog.html, item.html, new-item.html, edit-item.html, account.html, contact.html, about.html
@@ -74,6 +74,11 @@ Total seeded faults: **40**
 - **Page(s):** account.html
 - **What it is:** Saving the account form successfully does not change the displayed 'Last updated' date — it stays fixed at its original seed value no matter how many times you save.
 - **Technical detail:** test-app/server/lib/store.js's updateAccount() spreads the existing account object without setting a new updatedAt on write.
+
+### H-04 — Golden reference page's own brand color silently drifted from a prior release
+- **Page(s):** index.html
+- **What it is:** The primary brand blue on the Home page (nav active-state, hero CTA button) no longer matches the value that shipped in the previous git commit — it changed from #2C6FBB to #3B6FA0 with no changelog, announcement, or accompanying update anywhere else in the app.
+- **Technical detail:** test-app/public/index.html has an inline <style>:root{--color-primary:#3B6FA0;}</style> added after the main.css link in a later commit, overriding the shared brand token on this page only. Added deliberately in a follow-up commit to exercise the History heuristic specifically: this is undetectable by any single-snapshot comparison (nav/visual-consistency scanning, cross-page checks) because every other page's 'golden reference' comparison is defined relative to whatever index.html currently shows — since index.html itself is the thing that regressed, the scanner has no independent oracle to catch it, and would instead perversely start flagging every OTHER (still-correct) page as deviating from the now-wrong golden color. Only detectable by diffing this commit against the app's own git history (e.g. git log -p -- test-app/public/index.html, or comparing against a previous release/tag), which the current exploratory-tester tool does not do — see README.md Recommendations.
 
 ## Image (4)
 
