@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "faultId": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["FOUND", "PARTIALLY_FOUND", "MISSED"] },
+          "matchingFinding": { "type": "string", "description": "A short quote or paraphrase of the tester finding that matches, if any." },
+          "detectionSource": { "type": "string", "enum": ["deterministic", "ai", "both", "unclear", "n/a"], "description": "The session notes tag each finding with its source, e.g. '(source: deterministic)' or '(source: ai)'. Report which source(s) produced the matching finding; use 'n/a' only for a MISSED verdict." },
+          "reasoning": { "type": "string" }
+        },
+        "required": ["faultId", "verdict", "detectionSource", "reasoning"],
+        "additionalProperties": false
+      }
+    },
+    "falsePositives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "findingText": { "type": "string" },
+          "page": { "type": "string" },
+          "isRealButUnseededDefect": { "type": "boolean", "description": "True if this looks like a genuine defect that just isn't in the seeded fault catalog (not a false positive in the harsh sense), false if it's simply wrong/not a defect." },
+          "reasoning": { "type": "string" }
+        },
+        "required": ["findingText", "isRealButUnseededDefect", "reasoning"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["verdicts", "falsePositives"],
+  "additionalProperties": false
+}

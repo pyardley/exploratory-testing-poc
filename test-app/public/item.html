@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item — WidgetWorks</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .item-layout { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); align-items: start; }
+    .item-layout img { width: 100%; border-radius: var(--radius); }
+    .meta-row { display: flex; gap: var(--space-4); color: var(--color-muted); margin-bottom: var(--space-3); }
+    @media (max-width: 720px) { .item-layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/index.html" class="logo-link"><img src="/img/logo.svg" alt="WidgetWorks"></a>
+      <nav>
+        <ul class="main-nav">
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/catalog.html" class="active">Catalog</a></li>
+          <li><a href="/account.html">Account</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container item-layout">
+      <img id="itemImage" src="" alt="">
+      <div>
+        <h1 id="itemName"></h1>
+        <div class="meta-row">
+          <span id="itemCategory"></span>
+          <span id="itemAddedOn"></span>
+        </div>
+        <p class="price" id="itemPrice" style="font-size:1.5rem;"></p>
+        <p id="itemDescription"></p>
+        <div class="form-actions">
+          <a href="/catalog.html" class="btn btn-secondary">Back to catalog</a>
+          <a id="editLink" href="#" class="btn btn-primary">Edit this widget</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2019 WidgetWorks</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/item.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "exploratory-testing-poc",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-augmented exploratory testing proof of concept: a deliberately buggy test app, an FEW HICCUPSS + CRUD checklist, a Playwright-based exploratory tester, and a comparison report scoring it against a hidden answer key.",
+  "workspaces": [
+    "test-app",
+    "exploratory-tester",
+    "comparison"
+  ],
+  "scripts": {
+    "app:install": "npm install --workspace test-app",
+    "app:start": "npm run start --workspace test-app",
+    "app:reset-db": "npm run reset-db --workspace test-app",
+    "tester:install": "npm install --workspace exploratory-tester",
+    "tester:run": "npm run run --workspace exploratory-tester",
+    "compare:install": "npm install --workspace comparison",
+    "compare:run": "npm run run --workspace comparison",
+    "demo": "node scripts/run-full-demo.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

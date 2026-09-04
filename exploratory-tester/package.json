@@ -1,0 +1,18 @@
+{
+  "name": "exploratory-tester",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Deterministic-scan-first, AI-augmented exploratory testing tool. Runs Playwright-based scanners against a target site, then uses headless `claude -p` calls to review the fixed evidence bundle and write human-style exploratory session notes.",
+  "bin": {
+    "exploratory-tester": "./bin/cli.js"
+  },
+  "scripts": {
+    "run": "node bin/cli.js"
+  },
+  "dependencies": {
+    "playwright": "^1.62.1",
+    "@axe-core/playwright": "^4.13.0",
+    "cross-spawn": "^7.0.6"
+  }
+}

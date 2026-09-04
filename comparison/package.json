@@ -1,0 +1,13 @@
+{
+  "name": "comparison",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Scores an exploratory-tester run against the hidden answer-key fault catalog. The ONLY package in this repo allowed to read answer-key/, and only after a tester run already exists.",
+  "scripts": {
+    "run": "node src/compare.js"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.6"
+  }
+}

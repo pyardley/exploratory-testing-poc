@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "overallSummary": { "type": "string", "description": "3-6 sentence session-level summary, as a human exploratory tester would write in their session notes." },
+    "crossPageFindings": {
+      "type": "array",
+      "description": "Findings only visible by comparing two or more pages against each other (e.g. contradictory claims).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "observation": { "type": "string" },
+          "pagesInvolved": { "type": "array", "items": { "type": "string" } },
+          "heuristics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["Familiarity", "Explainability", "World", "History", "Image", "Comparable Products", "Claims", "User Expectations", "Purpose", "Statutes/Standards", "CRUD-Create", "CRUD-Read", "CRUD-Update", "CRUD-Delete"]
+            }
+          },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+        },
+        "required": ["observation", "pagesInvolved", "heuristics", "severity", "confidence"],
+        "additionalProperties": false
+      }
+    },
+    "prioritizedIssues": { "type": "array", "items": { "type": "string" }, "description": "Top issues across the whole session, most important first, referencing finding text." }
+  },
+  "required": ["overallSummary", "crossPageFindings", "prioritizedIssues"],
+  "additionalProperties": false
+}

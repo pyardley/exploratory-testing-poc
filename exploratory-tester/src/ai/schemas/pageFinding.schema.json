@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "page": { "type": "string" },
+    "narrative": { "type": "string", "description": "2-4 sentence exploratory-tester-style narrative summary of this page." },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "observation": { "type": "string" },
+          "heuristics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["Familiarity", "Explainability", "World", "History", "Image", "Comparable Products", "Claims", "User Expectations", "Purpose", "Statutes/Standards", "CRUD-Create", "CRUD-Read", "CRUD-Update", "CRUD-Delete"]
+            }
+          },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+          "evidenceRefs": { "type": "array", "items": { "type": "string" } },
+          "questionOrRisk": { "type": "string" }
+        },
+        "required": ["observation", "heuristics", "severity", "confidence"],
+        "additionalProperties": false
+      }
+    },
+    "openQuestions": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["page", "narrative", "findings", "openQuestions"],
+  "additionalProperties": false
+}

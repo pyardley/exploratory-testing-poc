@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" width="160" height="40" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">WidgetWorks</title>
+  <rect x="0" y="4" width="32" height="32" rx="8" fill="#2C6FBB"/>
+  <path d="M9 20a7 7 0 1 1 14 0 7 7 0 0 1-14 0z" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+  <circle cx="16" cy="20" r="2.4" fill="#FFFFFF"/>
+  <text x="40" y="27" font-family="Inter, system-ui, sans-serif" font-size="19" font-weight="700" fill="#1A1A1A">Widget<tspan fill="#2C6FBB">Works</tspan></text>
+</svg>

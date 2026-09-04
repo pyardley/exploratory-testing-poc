@@ -1,0 +1,13 @@
+{
+  "name": "test-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "reset-db": "node -e \"import('./server/lib/store.js').then(m => { m.resetDb(); console.log('db reset from seed'); })\""
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
