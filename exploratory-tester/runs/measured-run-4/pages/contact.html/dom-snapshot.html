@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — WidgetWorks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .form-narrow { max-width: 520px; }
+    #contactSubmitBtn { border-radius: 0; }
+    .faq-item { margin-bottom: var(--space-4); }
+    .helper-text { color: #B5B5B5; font-size: 0.8125rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/index.html" class="logo-link"><img src="/img/logo.svg" alt="WidgetWorks"></a>
+      <nav>
+        <ul class="main-nav">
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/catalog.html">Catalog</a></li>
+          <li><a href="/account.html">Account</a></li>
+          <li><a href="/contact.html" class="active">Contact</a></li>
+          <li><a href="/about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container form-narrow">
+      <h1>Contact us</h1>
+      <p class="text-muted">Support response within 1 hour, 24/7.</p>
+      <div id="formBanner"></div>
+      <form id="contactForm">
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name">
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-field">
+          <label for="message">Message</label>
+          <textarea id="message" rows="5"></textarea>
+          <div class="helper-text">Please include your order number if applicable.</div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-secondary" id="contactSubmitBtn">Send message</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="container form-narrow" style="margin-top: var(--space-6);">
+      <h2>Frequently asked questions</h2>
+      <div class="faq-item">
+        <h3>Do you ship internationally?</h3>
+        <p class="text-muted">We currently ship within the continental United States.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What's your return policy?</h3>
+        <p class="text-muted">Unused items in original packaging can be returned within 30 days.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I check if an item is in stock?</h3>
+        <p class="text-muted">The catalog page reflects current stock in real time.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2019 WidgetWorks</p>
+    </div>
+  </footer>
+
+  <script src="/js/contact.js"></script>
+
+
+</body></html>

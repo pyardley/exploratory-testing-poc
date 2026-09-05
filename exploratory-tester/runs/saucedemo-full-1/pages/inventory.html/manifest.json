@@ -1,0 +1,89 @@
+{
+  "url": "https://www.saucedemo.com/inventory.html",
+  "slug": "inventory.html",
+  "reachedVia": "already-positioned",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Swag Labs",
+  "navError": null,
+  "headings": [],
+  "badgeLikeText": [],
+  "footerText": "TwitterFacebookLinkedIn© 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 1,
+  "accessibilityViolations": [
+    {
+      "id": "select-name",
+      "impact": "critical",
+      "help": "Select element must have an accessible name",
+      "description": "Ensure select element has an accessible name",
+      "tags": [
+        "cat.forms",
+        "wcag2a",
+        "wcag412",
+        "section508",
+        "section508.22.n",
+        "TTv5",
+        "TT5.c",
+        "EN-301-549",
+        "EN-9.4.1.2",
+        "ACT",
+        "RGAAv4",
+        "RGAA-11.1.1"
+      ],
+      "nodes": [
+        {
+          "target": [
+            "select"
+          ],
+          "html": "<select class=\"product_sort_container\" data-test=\"product-sort-container\"><option value=\"az\">Name (A to Z)</option><option value=\"za\">Name (Z to A)</option><option value=\"lohi\">Price (low to high)</option><option value=\"hilo\">Price (high to low)</option></select>",
+          "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+        }
+      ]
+    }
+  ],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [
+      {
+        "controlId": "select-0",
+        "optionsProbed": [
+          "Name (A to Z)",
+          "Name (Z to A)",
+          "Price (low to high)",
+          "Price (high to low)"
+        ],
+        "allSelectionsProducedIdenticalContent": true,
+        "someSelectionsProducedNoChange": [],
+        "directionClaimMismatch": {
+          "label": "Price (low to high)",
+          "claimedDirection": "asc",
+          "observedValues": [
+            29.99,
+            9.99,
+            15.99,
+            49.99,
+            7.99,
+            15.99
+          ]
+        }
+      }
+    ],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/inventory.html/screenshot-full.png",
+    "domSnapshot": "pages/inventory.html/dom-snapshot.html",
+    "textContent": "pages/inventory.html/text-content.txt"
+  }
+}

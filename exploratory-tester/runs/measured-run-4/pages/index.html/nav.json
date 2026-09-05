@@ -1,0 +1,25 @@
+{
+  "nav": [
+    {
+      "label": "Home",
+      "href": "/index.html"
+    },
+    {
+      "label": "Catalog",
+      "href": "/catalog.html"
+    },
+    {
+      "label": "Account",
+      "href": "/account.html"
+    },
+    {
+      "label": "Contact",
+      "href": "/contact.html"
+    },
+    {
+      "label": "About",
+      "href": "/about.html"
+    }
+  ],
+  "deviationsFromGolden": []
+}

@@ -1,0 +1,40 @@
+{
+  "url": "http://localhost:4173/about.html",
+  "slug": "about.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "About — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Our story",
+    "Our mission"
+  ],
+  "badgeLikeText": [
+    "Since 2018-06-01",
+    "Carbon-neutral shipping on every order"
+  ],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 0,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/about.html/screenshot-full.png",
+    "domSnapshot": "pages/about.html/dom-snapshot.html",
+    "textContent": "pages/about.html/text-content.txt"
+  }
+}

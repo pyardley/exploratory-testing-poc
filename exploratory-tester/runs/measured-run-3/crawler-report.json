@@ -1,0 +1,244 @@
+{
+  "pages": [
+    {
+      "url": "http://localhost:4173",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/index.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/catalog.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/account.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/contact.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/about.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/new-item.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-009",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-021",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-022",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-017",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-006",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-024",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-013",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-009",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-021",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-022",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-017",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-006",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-024",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-013",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    }
+  ],
+  "allVisited": [
+    {
+      "url": "http://localhost:4173",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/index.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/catalog.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/account.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/contact.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/about.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/new-item.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-009",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-021",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-022",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-017",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-006",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-024",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/item.html?id=w-013",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-009",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-021",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-001",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-022",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-017",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-006",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-024",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "http://localhost:4173/edit-item.html?id=w-013",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8"
+    }
+  ],
+  "brokenLinks": [],
+  "brokenAssets": [
+    {
+      "url": "http://localhost:4173/img/widgets-missing/w-024.svg",
+      "status": 404,
+      "foundOnPage": "http://localhost:4173/catalog.html"
+    }
+  ]
+}

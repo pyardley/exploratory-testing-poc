@@ -1,0 +1,38 @@
+{
+  "url": "http://localhost:4173/catalog.html",
+  "slug": "catalog.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Catalog — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Catalog",
+    "Anodized Standoff Set",
+    "Anti-Vibration Washer Set",
+    "Aurora Hex Bolt Set",
+    "Bench Vise Jaw Pads",
+    "Brass Knurled Thumbscrew",
+    "Brushed Drawer Pull",
+    "Cable Tension Meter",
+    "Carbon Fiber Spacer Kit"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/catalog.html/screenshot-full.png",
+    "domSnapshot": "pages/catalog.html/dom-snapshot.html",
+    "textContent": "pages/catalog.html/text-content.txt"
+  }
+}

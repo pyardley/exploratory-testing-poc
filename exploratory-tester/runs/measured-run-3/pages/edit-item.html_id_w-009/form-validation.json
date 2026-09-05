@@ -1,0 +1,16 @@
+{
+  "forms": [
+    {
+      "formId": "editItemForm",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": true,
+      "errorIndicatorShown": false
+    }
+  ],
+  "cancelButtonProbes": [
+    {
+      "label": "Cancel",
+      "triggeredNetworkRequest": true
+    }
+  ]
+}

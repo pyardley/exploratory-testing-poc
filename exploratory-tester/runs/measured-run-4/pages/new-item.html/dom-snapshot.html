@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Widget — WidgetWorks</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    #saveBtn { background: #2D6FC0; }
+    #saveBtn:hover { background: #24589c; }
+    .form-narrow { max-width: 520px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/index.html" class="logo-link"><img src="/img/logo.svg" alt="WidgetWorks"></a>
+      <nav>
+        <ul class="main-nav">
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/catalog.html" class="active">Catalog</a></li>
+          <li><a href="/account.html">Account</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container form-narrow">
+      <h1>Add a widget</h1>
+      <div id="formBanner"></div>
+      <form id="newItemForm">
+        <div class="form-field">
+          <input type="text" id="name" placeholder="Widget name">
+        </div>
+        <div class="form-field">
+          <input type="text" id="category" placeholder="Category (e.g. Fasteners)">
+        </div>
+        <div class="form-field">
+          <textarea id="description" rows="4" placeholder="Description"></textarea>
+        </div>
+        <div class="form-field">
+          <input type="text" id="price" placeholder="Price (USD)">
+        </div>
+        <div class="form-field">
+          <input type="text" id="weight" placeholder="e.g. 12 lbs">
+          <div class="hint">Weight (kg)</div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">Save widget</button>
+          <a href="/catalog.html" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2019 WidgetWorks</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/new-item.js"></script>
+
+
+</body></html>

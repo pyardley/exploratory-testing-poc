@@ -1,0 +1,30 @@
+{
+  "directionalControls": [
+    {
+      "controlId": "select-0",
+      "optionsProbed": [
+        "Name (A to Z)",
+        "Name (Z to A)",
+        "Price (low to high)",
+        "Price (high to low)"
+      ],
+      "allSelectionsProducedIdenticalContent": true,
+      "someSelectionsProducedNoChange": [],
+      "directionClaimMismatch": {
+        "label": "Price (low to high)",
+        "claimedDirection": "asc",
+        "observedValues": [
+          29.99,
+          9.99,
+          15.99,
+          49.99,
+          7.99,
+          15.99
+        ]
+      }
+    }
+  ],
+  "searchProbes": [],
+  "paginationProbes": [],
+  "checkboxRoundTrip": []
+}

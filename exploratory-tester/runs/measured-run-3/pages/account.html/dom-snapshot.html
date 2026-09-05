@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — WidgetWorks</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .form-narrow { max-width: 480px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <img src="/img/logo.svg" alt="WidgetWorks">
+      <nav>
+        <ul class="main-nav">
+          <li><a href="/index.html">Home</a></li>
+          <li><a href="/catalog.html">Catalog</a></li>
+          <li><a href="/account.html" class="active">Account</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container form-narrow">
+      <h1>Account</h1>
+      <div id="formBanner"></div>
+      <form id="accountForm">
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name">
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-field">
+          <label><input type="checkbox" id="notifications"> Email me order updates</label>
+        </div>
+        <p class="text-muted" id="lastUpdated">Last updated: 11/2/2025</p>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2019 WidgetWorks</p>
+    </div>
+  </footer>
+
+  <script src="/js/account.js"></script>
+
+
+</body></html>

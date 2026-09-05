@@ -1,0 +1,21 @@
+{
+  "forms": [
+    {
+      "formId": "editItemForm",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": true,
+      "errorIndicatorShown": false,
+      "errorTextOnEmptySubmit": null,
+      "numericFieldProbed": "price",
+      "errorTextOnInvalidType": null,
+      "networkRequestFiredOnInvalidType": true,
+      "sameErrorTextAcrossScenarios": false
+    }
+  ],
+  "cancelButtonProbes": [
+    {
+      "label": "Cancel",
+      "triggeredNetworkRequest": true
+    }
+  ]
+}

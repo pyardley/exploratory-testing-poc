@@ -1,0 +1,146 @@
+{
+  "overallSummary": "This session covered all eight in-scope pages of WidgetWorks and found defects at every severity level, ranging from three completely non-functional catalog controls (search, sort direction, pagination) that make the core browse-and-buy experience largely unusable, to high-severity form-safety failures on the edit and contact pages, to a compound false promise about real-time catalog accuracy spread across three pages. The account and edit-item pages both silently fail on their primary CRUD operations, leaving the shop owner with no feedback and potentially corrupted data. Cross-cutting issues — a site-wide primary button color regression, stale © 2019 footers on every page except Home, inconsistent weight-unit labeling between the two inventory forms, and an unverifiable soft-delete promise with no restore UI anywhere in the product — indicate that the pages were developed without a shared component baseline and without a cross-page review pass. The most credible page in the product is the Home page, which ironically also contains the seed of several cross-page contradictions (hardcoded \"1,200+ parts\" stat, \"Always current\" brand promise) that compound into confirmed false claims when compared against Contact's FAQ and the broken Catalog.",
+  "crossPageFindings": [
+    {
+      "observation": "Home footer reads '© 2026 WidgetWorks' (correct); every other page in the product — Catalog, Account, Contact, About, New Item, Item Detail, Edit Item — reads '© 2019'. This reveals selective maintenance: the Home page received a footer update that was never propagated to the shared template used by all other pages. The stale 2019 year is only identifiable as selectively stale (rather than consistently stale) by comparing Home to any other page.",
+      "pagesInvolved": [
+        "http://localhost:4173/index.html",
+        "http://localhost:4173/catalog.html",
+        "http://localhost:4173/account.html",
+        "http://localhost:4173/contact.html",
+        "http://localhost:4173/about.html",
+        "http://localhost:4173/new-item.html",
+        "http://localhost:4173/item.html?id=w-009",
+        "http://localhost:4173/edit-item.html?id=w-009"
+      ],
+      "heuristics": [
+        "History",
+        "Image"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "Contact's FAQ answers the question 'How do I check if an item is in stock?' with 'The catalog page reflects current stock in real time.' This is a direct cross-page false claim: the Home page's 'Always current' feature card makes the same promise but its stats block ('1,200+ Parts in catalog', '6 Categories') is hardcoded HTML that cannot update; and the Catalog page has completely non-functional pagination, making two-thirds of catalog items unreachable. Three pages together assert real-time catalog accuracy; the Catalog and Home together disprove it.",
+      "pagesInvolved": [
+        "http://localhost:4173/contact.html",
+        "http://localhost:4173/index.html",
+        "http://localhost:4173/catalog.html"
+      ],
+      "heuristics": [
+        "Claims",
+        "History",
+        "Purpose"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The weight field on the New Item form uses a placeholder of 'e.g. 12 lbs' (pounds) while the hint beneath it reads 'Weight (kg)' — the new-item form is self-contradictory. Comparing to the Edit Item form for the same data field confirms the intended unit is kilograms: edit-item carries a proper label 'Weight (kg)' with no lbs reference at all. A shop owner creating a new item who follows the placeholder example will store a value approximately 2.2× too large, and the discrepancy is only visible by comparing the two inventory management forms.",
+      "pagesInvolved": [
+        "http://localhost:4173/new-item.html",
+        "http://localhost:4173/edit-item.html?id=w-009"
+      ],
+      "heuristics": [
+        "World",
+        "Claims",
+        "Comparable Products"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "Both the New Item and Edit Item forms manage the same data entity (a widget), but their accessibility treatment is opposite. Edit Item has correct `<label>` elements for all five fields (Name, Category, Description, Price, Weight). New Item has zero label elements — all five fields use placeholder text as their only identification, which disappears as the user types and violates WCAG 1.3.1 and 4.1.2. The inconsistency is only detectable by comparing the two forms; a single-page view of either form does not reveal that the other exists and handles the same fields correctly or incorrectly.",
+      "pagesInvolved": [
+        "http://localhost:4173/new-item.html",
+        "http://localhost:4173/edit-item.html?id=w-009"
+      ],
+      "heuristics": [
+        "Statutes/Standards",
+        "Comparable Products"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Cancel button on New Item is implemented as `<a href=\"/catalog.html\">` — a safe navigation link that discards changes and returns to the catalog. The Cancel button on Edit Item is a `<button type=\"button\" id=\"cancelBtn\">` that triggers a network request when clicked. These two forms handle the same user intent (abandon an edit and go back) in structurally opposite ways. The new-item implementation is the correct pattern and makes clear that the edit-item Cancel firing a network request is not intentional design but a defect — a conclusion only reachable by comparing both forms.",
+      "pagesInvolved": [
+        "http://localhost:4173/new-item.html",
+        "http://localhost:4173/edit-item.html?id=w-009"
+      ],
+      "heuristics": [
+        "Familiarity",
+        "User Expectations",
+        "Comparable Products"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Edit Item page promises 'This item will be archived and can be restored within 30 days' in its danger zone, creating a contractual soft-delete expectation. Reviewing every other page in the product — Home, Catalog, Account (profile and notification settings), Contact, About, Item Detail, New Item — finds no restore interface anywhere: no 'Archived items' section, no 'Restore' link, no account-level recovery mechanism. The promise is only recognizable as unverifiable (and likely false) by confirming its absence across the full page set.",
+      "pagesInvolved": [
+        "http://localhost:4173/edit-item.html?id=w-009",
+        "http://localhost:4173/catalog.html",
+        "http://localhost:4173/account.html",
+        "http://localhost:4173 (Home)"
+      ],
+      "heuristics": [
+        "Claims",
+        "CRUD-Delete"
+      ],
+      "severity": "high",
+      "confidence": "medium"
+    },
+    {
+      "observation": "Five pages — Catalog, Account, Item Detail, Edit Item, and New Item — all show a primary action button with background rgb(44,111,187), consistently deviating from the golden Home page's primary color rgb(59,111,160) by a perceptual distance of ~31–35 units. Each per-page report notes the drift independently, but comparing across pages reveals this is a site-wide CSS regression affecting every action page uniformly, not an isolated per-page override (except new-item, which has an explicit inline style block `#2D6FC0` overriding the token). The full scope of the regression — and the fact that only Home is correct — is only visible across pages.",
+      "pagesInvolved": [
+        "http://localhost:4173/catalog.html",
+        "http://localhost:4173/account.html",
+        "http://localhost:4173/item.html?id=w-009",
+        "http://localhost:4173/edit-item.html?id=w-009",
+        "http://localhost:4173/new-item.html",
+        "http://localhost:4173/index.html"
+      ],
+      "heuristics": [
+        "Image",
+        "Comparable Products"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "Three-decimal price formatting ($14.200, $42.000, $6.200) appears on both the Catalog list and the Item Detail page, confirming the bug lives in a shared display/read formatter rather than in any one page's template. The Edit Item form pre-populates the same item's price as '14.2' (the raw float value, no trailing zero), revealing a third inconsistency: the stored value is a float, the list/detail formatter pads to three places, and the edit form shows the unformatted float. All three display contexts disagree on the canonical representation of the same price. This composite picture only emerges by comparing all three pages.",
+      "pagesInvolved": [
+        "http://localhost:4173/catalog.html",
+        "http://localhost:4173/item.html?id=w-009",
+        "http://localhost:4173/edit-item.html?id=w-009"
+      ],
+      "heuristics": [
+        "World",
+        "Explainability"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    }
+  ],
+  "prioritizedIssues": [
+    "Catalog pagination completely broken: 'Next' on 'Page 1 of 3' produces no change — two-thirds of the catalog is unreachable (Catalog page, CRUD-Read/Purpose/User Expectations, high severity)",
+    "Catalog search non-functional: entering any query produces zero change in the product grid with no error, no 'no results' state, no feedback of any kind (Catalog page, Purpose/Explainability/CRUD-Read, high severity)",
+    "Catalog 'Price: Low to High' sort is inverted — observed order is descending [$42, $34.99, ...], the direct opposite of the label's promise (Catalog page, User Expectations/Claims/CRUD-Read, high severity)",
+    "Contact form submits empty with no client-side validation, server returns a bad response, and no feedback is shown to the user — outcome is entirely ambiguous (Contact page, Explainability/User Expectations/CRUD-Create, high severity)",
+    "Edit Item Cancel button fires a network request instead of cleanly discarding changes — comparison with New Item's safe `<a href>` Cancel confirms this is a defect, not intent (cross-page: Edit Item + New Item, User Expectations/Familiarity/CRUD-Update, high severity)",
+    "Edit Item submits an empty form to the server with no client-side validation guard and shows no error indicator — a shop owner can silently push an empty or partial record (Edit Item page, CRUD-Update/User Expectations/Statutes-Standards, high severity)",
+    "Account form: submitting with a bad API response exposes the raw JavaScript exception 'Error: Cannot read properties of null (reading 'field')' directly to the user (Account page, Explainability, high severity)",
+    "Account 'Email me order updates' checkbox state does not persist on save — toggling and saving reverts to the original state on reload, CRUD-Update lifecycle broken for this field (Account page, CRUD-Update/User Expectations, high severity)",
+    "New Item weight field: placeholder 'e.g. 12 lbs' directly contradicts the hint 'Weight (kg)' and the Edit Item form's label 'Weight (kg)' — a user following the example stores a value ~2.2× too large (cross-page: New Item + Edit Item, World/Claims/Comparable Products, high severity)",
+    "Contact FAQ states 'The catalog page reflects current stock in real time' — false on two counts: Home page stats are hardcoded HTML that cannot update, and Catalog pagination is broken hiding two-thirds of items (cross-page: Contact + Home + Catalog, Claims/History/Purpose, high severity)",
+    "Edit Item 'archived and restorable within 30 days' delete promise is unverifiable: no restore UI exists anywhere in the product across all eight pages reviewed (cross-page: Edit Item vs. all other pages, Claims/CRUD-Delete, high severity)",
+    "About page: 'Founded in 2018, WidgetWorks has been serving customers for over 15 years' — as of 2026-09-04 the company is approximately 8 years old; the claim would only be true in 2033 (About page, World/History/Claims, high severity)",
+    "Contact page helper text fails WCAG 2 AA contrast: #b5b5b5 on #ffffff yields 2.05:1, against the 4.5:1 minimum — confirmed serious accessibility violation (Contact page, Statutes/Standards, high severity)",
+    "New Item form has no `<label>` elements on any of its five fields (placeholder-only) — violates WCAG 1.3.1 and 4.1.2, directly contradicting Edit Item which implements labels correctly for the same fields (cross-page: New Item + Edit Item, Statutes/Standards/Comparable Products, high severity)",
+    "Three-decimal price formatting ($14.200) appears on both Catalog and Item Detail — confirmed shared display-formatter bug; Edit Item shows the same value as '14.2' (raw float), revealing three inconsistent representations of the same price (cross-page, World/Explainability, high severity)",
+    "Primary button color drift (rgb(44,111,187) vs. golden rgb(59,111,160)) affects every action page in the product — Catalog, Account, Item Detail, Edit Item, New Item — while Home alone is correct; site-wide CSS regression (cross-page, Image/Comparable Products, medium severity)",
+    "Home footer © 2026 is correct; every other page shows © 2019, seven years stale — selective maintenance that reveals no shared footer template or propagation process (cross-page, History/Image, medium severity)",
+    "Cable Tension Meter image has incorrect src path '/img/widgets-missing/w-024.svg' — broken image visible in Catalog, causing 3 console errors and a broken-image icon for that product (Catalog page, Image/CRUD-Read, medium severity)"
+  ]
+}

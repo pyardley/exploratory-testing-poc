@@ -1,0 +1,35 @@
+{
+  "url": "https://www.saucedemo.com/cart.html",
+  "slug": "cart.html",
+  "reachedVia": "client-side-navigation",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Swag Labs",
+  "navError": null,
+  "headings": [],
+  "badgeLikeText": [],
+  "footerText": "TwitterFacebookLinkedIn© 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/cart.html/screenshot-full.png",
+    "domSnapshot": "pages/cart.html/dom-snapshot.html",
+    "textContent": "pages/cart.html/text-content.txt"
+  }
+}

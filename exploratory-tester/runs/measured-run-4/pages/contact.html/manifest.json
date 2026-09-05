@@ -1,0 +1,88 @@
+{
+  "url": "http://localhost:4173/contact.html",
+  "slug": "contact.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Contact — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Contact us",
+    "Frequently asked questions",
+    "Do you ship internationally?",
+    "What's your return policy?",
+    "How do I check if an item is in stock?"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 1,
+  "accessibilityViolations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "nodes": [
+        {
+          "target": [
+            ".helper-text"
+          ],
+          "html": "<div class=\"helper-text\">Please include your order number if applicable.</div>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.05 (foreground color: #b5b5b5, background color: #ffffff, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    }
+  ],
+  "visualDeviationsFromGolden": [
+    {
+      "type": "missing-favicon",
+      "heuristics": [
+        "Image"
+      ],
+      "description": "This page has no favicon link, unlike the golden reference page."
+    }
+  ],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [
+      {
+        "formId": "contactForm",
+        "submittedEmpty": true,
+        "networkRequestFiredOnEmptySubmit": true,
+        "errorIndicatorShown": false,
+        "errorTextOnEmptySubmit": null,
+        "numericFieldProbed": null,
+        "errorTextOnInvalidType": null,
+        "networkRequestFiredOnInvalidType": null,
+        "sameErrorTextAcrossScenarios": null
+      }
+    ],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/contact.html/screenshot-full.png",
+    "domSnapshot": "pages/contact.html/dom-snapshot.html",
+    "textContent": "pages/contact.html/text-content.txt"
+  }
+}

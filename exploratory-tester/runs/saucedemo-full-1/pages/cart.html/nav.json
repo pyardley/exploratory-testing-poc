@@ -1,0 +1,21 @@
+{
+  "nav": [
+    {
+      "label": "All Items",
+      "href": "#"
+    },
+    {
+      "label": "About",
+      "href": "https://saucelabs.com/error/404"
+    },
+    {
+      "label": "Logout",
+      "href": "#"
+    },
+    {
+      "label": "Reset App State",
+      "href": "#"
+    }
+  ],
+  "deviationsFromGolden": []
+}

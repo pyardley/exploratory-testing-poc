@@ -1,0 +1,31 @@
+{
+  "facts": {
+    "logo": {
+      "src": "/img/logo.svg",
+      "width": 160,
+      "height": 40,
+      "aspectRatio": 4,
+      "hasLinkWrapper": true
+    },
+    "primaryButton": {
+      "text": "Save widget",
+      "backgroundColor": "rgb(45, 111, 192)",
+      "borderRadius": "6px",
+      "padding": "8px 24px"
+    },
+    "containerPadding": "24px",
+    "formFieldSpacing": "24px",
+    "bodyFontFamily": "Inter, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "hasInterFontLink": true,
+    "hasFaviconLink": true
+  },
+  "deviationsFromGolden": [
+    {
+      "type": "primary-button-color-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary button background (rgb(45, 111, 192)) differs from the golden reference's primary color (rgb(59, 111, 160)), distance=34.9."
+    }
+  ]
+}

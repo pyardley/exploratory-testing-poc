@@ -1,0 +1,10 @@
+{
+  "failedRequests": [],
+  "badResponses": [
+    {
+      "url": "http://localhost:4173/api/account",
+      "status": 400
+    }
+  ],
+  "pageErrors": []
+}

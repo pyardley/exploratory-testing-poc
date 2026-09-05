@@ -1,0 +1,299 @@
+[
+  {
+    "page": "https://www.saucedemo.com/inventory.html",
+    "narrative": "The Swag Labs inventory/catalog page lists six products in a two-column grid and offers a sort dropdown — the page's primary interactive feature. Two high-severity defects dominate: the sort control is completely non-functional (all four options produce identical output), and every product card uses the exact same photograph regardless of what the product is, which would be deeply confusing to any real shopper trying to evaluate items visually. A critical accessibility violation on the sort dropdown compounds the functional failure. The page is otherwise structurally simple and loads without visible layout breakage.",
+    "findings": [
+      {
+        "observation": "All four sort options — Name (A to Z), Name (Z to A), Price (low to high), Price (high to low) — produce identical item order. The scanner confirmed allSelectionsProducedIdenticalContent: true. Selecting any option has no observable effect; the catalog stays in name-ascending order regardless of the user's choice.",
+        "questionOrRisk": "The sort control's core purpose is completely undelivered. Users cannot sort by price or reverse alphabetical order at all, silently failing without any error or feedback.",
+        "heuristics": [
+          "Purpose",
+          "User Expectations",
+          "Claims",
+          "CRUD-Read"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "interactionProbeFindings.directionalControls[0].allSelectionsProducedIdenticalContent = true",
+          "pages/inventory.html/screenshot-full.png"
+        ]
+      },
+      {
+        "observation": "When 'Price (low to high)' is selected, the scanner recorded observed values [29.99, 9.99, 15.99, 49.99, 7.99, 15.99] — clearly not ascending. The label claims ascending price order; the output contradicts it. This is a specific claims mismatch on top of the broader broken-sort finding.",
+        "questionOrRisk": "Even if sorting were partially fixed, the price-ascending option would still produce wrong output, misleading users who rely on the label to find the cheapest items first.",
+        "heuristics": [
+          "Claims",
+          "User Expectations",
+          "World"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "interactionProbeFindings.directionalControls[0].directionClaimMismatch"
+        ]
+      },
+      {
+        "observation": "Every product card — Backpack, Bike Light, Bolt T-Shirt, Fleece Jacket, Onesie, and T-Shirt (Red) — displays the identical photograph of a pug dog holding a tennis ball. No product shows a distinguishing image of the actual item.",
+        "questionOrRisk": "A customer evaluating products visually cannot distinguish them by image. For a catalog whose stated purpose is to let prospective buyers browse before getting in touch, this is a fundamental credibility and usability failure. It also raises a factual-consistency issue: a bike light and a backpack cannot look identical.",
+        "heuristics": [
+          "Image",
+          "World",
+          "User Expectations",
+          "Purpose"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/inventory.html/screenshot-full.png"
+        ]
+      },
+      {
+        "observation": "The sort <select> element has no label, aria-label, aria-labelledby, or title attribute. A screen reader user encounters an unnamed control with no indication of its purpose. The axe scan flagged this as a critical WCAG 2.1 Level A (4.1.2 Name, Role, Value) violation.",
+        "questionOrRisk": "Screen reader users cannot determine what this control does. Given sorting is the page's only interactive feature, this effectively locks assistive-technology users out of it entirely.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[0] — select-name, WCAG 4.1.2"
+        ]
+      },
+      {
+        "observation": "The manifest reports 1 console error and 1 bad HTTP response. No visible error UI is shown to the user. Without being able to inspect the browser console directly, the root cause is unknown, but silent failures of this kind often accompany the broken sort behavior (e.g., a failed API call for sorted results).",
+        "questionOrRisk": "Silent background failure may be masking further broken functionality that has no visible symptom. If it is a network error related to sort, the app should surface feedback rather than silently returning stale/unsorted data.",
+        "heuristics": [
+          "Explainability"
+        ],
+        "severity": "medium",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "consoleErrorCount: 1",
+          "badResponseCount: 1"
+        ]
+      },
+      {
+        "observation": "The visible 'Products' label above the catalog grid is not a semantic heading — the scanned headings array is empty []. The page has no h1 or any heading element at all.",
+        "questionOrRisk": "Screen reader users navigating by heading landmarks will find nothing to orient them. WCAG best practice (and general accessibility convention) expects a page-level heading that describes the content region.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Familiarity"
+        ],
+        "severity": "low",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "headings: []",
+          "text-content.txt line 3 — 'Products' present in text but not as heading"
+        ]
+      },
+      {
+        "observation": "The browser tab/page title is 'Swag Labs' — the site name — with no page-specific qualifier such as 'Products | Swag Labs'. Every page sharing this title would be indistinguishable in a browser tab list, bookmark manager, or browser history.",
+        "questionOrRisk": "Users with multiple tabs open, or returning to a bookmark, cannot identify which Swag Labs page they are on without switching to it.",
+        "heuristics": [
+          "Familiarity",
+          "User Expectations"
+        ],
+        "severity": "low",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "title: 'Swag Labs'"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "What is the console error and bad HTTP response? Are they related to the broken sort (e.g., a failed XHR/fetch for sorted results) or an unrelated resource failure?",
+      "Is the identical pug photo a placeholder/seed-data issue (i.e., real product images were never uploaded) or a template rendering bug that always outputs the same image regardless of the item's image field?",
+      "When sort is fixed, does the page re-render in place or navigate? The UX expectation (no page reload vs. full reload) should be verified against what actually happens.",
+      "Are there any items in the catalog that have been added via the Create flow? If so, do they appear here immediately after creation without a page refresh — confirming CRUD-Read consistency?",
+      "Does the shopping cart icon update its badge count correctly as 'Add to cart' is clicked — given the sort control is broken, are other interactive elements also silently failing?"
+    ]
+  },
+  {
+    "page": "https://www.saucedemo.com/cart.html",
+    "narrative": "The cart page was captured in an empty state — no items are present — which immediately surfaces two related problems: there is no empty-state message to orient the user, and the Checkout button is fully enabled despite having nothing to act on. A separate, high-severity finding in the DOM is that the \"About\" sidebar link is hard-coded to `https://saucelabs.com/error/404`, meaning any user who navigates to About from any page will land on an external 404. Accessibility structure is also weak: \"Your Cart\" is a styled `<span>`, not a heading element, leaving screen-reader users with no landmark to jump to.",
+    "findings": [
+      {
+        "observation": "The 'About' entry in the hamburger sidebar menu has href='https://saucelabs.com/error/404'. Clicking it sends the user to an external 404 error page on saucelabs.com rather than to the app's own About page. This is visible in the DOM: `<a id=\"about_sidebar_link\" href=\"https://saucelabs.com/error/404\">About</a>`.",
+        "questionOrRisk": "Any user navigating to About from any page (this link appears in the global nav) will hit a dead end on a third-party error page. Core navigation is broken.",
+        "heuristics": [
+          "Purpose",
+          "Claims",
+          "Familiarity"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/cart.html/dom-snapshot.html (line 33, about_sidebar_link href)"
+        ]
+      },
+      {
+        "observation": "The cart is empty, yet the 'Checkout' button is fully enabled and clickable. No guard, disabled state, or tooltip prevents the user from proceeding to checkout with zero items.",
+        "questionOrRisk": "A user who arrives at an empty cart and clicks Checkout will either reach a broken checkout flow or receive a cryptic error downstream, rather than being stopped early with clear guidance.",
+        "heuristics": [
+          "User Expectations",
+          "Purpose",
+          "Explainability"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/cart.html/screenshot-full.png",
+          "pages/cart.html/text-content.txt"
+        ]
+      },
+      {
+        "observation": "When the cart is empty the content area shows only the 'QTY / Description' column headers and then immediately the action buttons — no empty-state message, illustration, or call-to-action copy (e.g. 'Your cart is empty. Start shopping!'). The large blank gap between headers and buttons in the screenshot makes the page look broken.",
+        "questionOrRisk": "Users landing on an empty cart (e.g. after checkout, or via a direct URL) receive no feedback about why the cart is empty or what to do next. This is a standard e-commerce pattern that is missing entirely.",
+        "heuristics": [
+          "User Expectations",
+          "Explainability",
+          "Comparable Products"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/cart.html/screenshot-full.png",
+          "pages/cart.html/text-content.txt"
+        ]
+      },
+      {
+        "observation": "The page heading 'Your Cart' is rendered as `<span class=\"title\">`, not as `<h1>` or any heading element. The scanner confirms `headings: []`. Screen-reader users get no heading landmark to navigate to the cart section.",
+        "questionOrRisk": "Users navigating by headings (a common screen-reader pattern) cannot jump directly to the page's primary content region. WCAG 2.4.6 (Headings and Labels, AA) recommends descriptive headings; absence of any heading on a full page view is an accessibility gap.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/cart.html/dom-snapshot.html (line 33, span.title)"
+        ]
+      },
+      {
+        "observation": "The scanner recorded 1 console error and 1 bad HTTP response on this page. The evidence bundle does not expose the exact URL or error message, but their presence on a mostly-static empty cart page is unexpected.",
+        "questionOrRisk": "An unhandled console error could indicate a failed API call (e.g. a cart-fetch request returning 4xx/5xx) that silently swallows a real problem rather than surfacing it to the user.",
+        "heuristics": [
+          "Explainability"
+        ],
+        "severity": "medium",
+        "confidence": "low",
+        "evidenceRefs": [
+          "manifest consoleErrorCount: 1, badResponseCount: 1"
+        ]
+      },
+      {
+        "observation": "The browser `<title>` is 'Swag Labs' — identical to every other page. There is no page-specific qualifier such as 'Cart | Swag Labs'.",
+        "questionOrRisk": "Browser history, bookmarks, and assistive-technology page announcements cannot distinguish the cart from any other page by title alone.",
+        "heuristics": [
+          "User Expectations",
+          "Familiarity"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/cart.html/dom-snapshot.html (line 27, <title>)"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "What happens when a user clicks Checkout on an empty cart — does the app error, silently proceed, or show a validation message?",
+      "Is the 1 console error a failed cart-fetch API call? If so, is the empty cart state a data-load failure rather than a legitimate empty cart?",
+      "Is the broken About link (`/error/404`) present on every page's sidebar, or only on the cart page? (It appears global, but only the cart DOM was inspected here.)",
+      "Is there any mechanism to recover items added to the cart before a session reset or logout, or is cart state ephemeral?"
+    ]
+  },
+  {
+    "page": "https://www.saucedemo.com/inventory-item.html?id=5 — Sauce Labs Fleece Jacket (Item Detail)",
+    "narrative": "The Sauce Labs Fleece Jacket detail page renders its core content correctly — product name, description, $49.99 price, and a product image with meaningful alt text — and the automated accessibility scanner found zero flagged violations. However, several structural and convention issues undercut the page: the item name is a styled `<div>` rather than a semantic heading, the `<title>` element is the same generic \"Swag Labs\" string on every item detail page, and the brand wordmark is a non-interactive `<div>` rather than a home link. The sidebar's \"About\" entry is hard-coded to a 404 URL, contributing to the one bad response logged in the manifest.",
+    "findings": [
+      {
+        "observation": "The item name 'Sauce Labs Fleece Jacket' is rendered as a styled `<div class=\"inventory_details_name\">` with no semantic heading element (`<h1>`–`<h6>`) anywhere on the page. The manifest confirms `headings: []`. Screen-reader users cannot navigate by heading, and there is no document outline.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Purpose"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "questionOrRisk": "WCAG 2.1 SC 1.3.1 requires that heading-like content use actual heading markup. Assistive-technology users who rely on heading navigation will find the page structurally flat.",
+        "evidenceRefs": [
+          "manifest: headings: []",
+          "dom-snapshot.html line 33: <div class=\"inventory_details_name large_size\">"
+        ]
+      },
+      {
+        "observation": "The `<title>` element is 'Swag Labs' — identical across every item detail page regardless of which item is loaded. A user with multiple item detail tabs open cannot tell them apart; browser history and bookmarks are equally ambiguous.",
+        "heuristics": [
+          "Familiarity",
+          "User Expectations"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "Industry convention is for detail pages to include the item name in the title (e.g., 'Sauce Labs Fleece Jacket — Swag Labs'). The current generic title breaks orientation and makes bookmarking useless.",
+        "evidenceRefs": [
+          "dom-snapshot.html line 27: <title>Swag Labs</title>",
+          "manifest: otherUrlsSharingThisTemplate lists 5 other item pages all sharing the same template"
+        ]
+      },
+      {
+        "observation": "The 'Swag Labs' wordmark in the header is a `<div class=\"app_logo\">` with no wrapping anchor tag. Clicking it does nothing. Web convention — and the Familiarity heuristic — requires a logo to be a link back to the home page.",
+        "heuristics": [
+          "Familiarity",
+          "Comparable Products"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "A user who clicks the wordmark expecting to return to the catalog or landing page will be stranded. This is a near-universal web convention violation.",
+        "evidenceRefs": [
+          "dom-snapshot.html: <div class=\"app_logo\">Swag Labs</div> — no <a> wrapper",
+          "screenshot-full.png: wordmark visible top-center"
+        ]
+      },
+      {
+        "observation": "The shopping cart icon in the header is an `<a class=\"shopping_cart_link\">` with no text content and no `aria-label`. Screen readers will announce it as an unlabeled link ('link'), with no indication of its function or current cart count.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "WCAG 2.4.6 (Headings and Labels) and 4.1.2 (Name, Role, Value) require interactive elements to have accessible names. An empty anchor fails both.",
+        "evidenceRefs": [
+          "dom-snapshot.html: <a class=\"shopping_cart_link\" data-test=\"shopping-cart-link\"></a>"
+        ]
+      },
+      {
+        "observation": "The sidebar navigation 'About' link is hard-coded to `https://saucelabs.com/error/404`. The manifest records 1 bad response and 1 console error, consistent with this URL being fetched. Clicking 'About' deliberately navigates to a 404.",
+        "heuristics": [
+          "Purpose",
+          "Claims"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "A navigation item labelled 'About' that leads to a 404 is a broken promise to the user. It also explains the console error in the manifest.",
+        "evidenceRefs": [
+          "dom-snapshot.html: <a id=\"about_sidebar_link\" href=\"https://saucelabs.com/error/404\">About</a>",
+          "manifest: consoleErrorCount: 1, badResponseCount: 1"
+        ]
+      },
+      {
+        "observation": "In the screenshot, portions of the product description text appear to render with a blue/underline style that does not correspond to any `<a>` element in the DOM snapshot — the description is plain text inside a `<div>`.",
+        "heuristics": [
+          "Explainability",
+          "Image"
+        ],
+        "severity": "low",
+        "confidence": "low",
+        "questionOrRisk": "If the browser is auto-detecting something in the text as a link (phone, address, or other pattern), that could trigger unintended navigation. Alternatively this may be a screenshot rendering artifact and not reproducible in a live session.",
+        "evidenceRefs": [
+          "screenshot-full.png: description text shows apparent blue underline styling",
+          "dom-snapshot.html: <div class=\"inventory_details_desc large_size\"> contains plain text with no child <a> elements"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Does the 'Back to products' button restore the user's previous scroll position and filter/sort state in the catalog, or does it reset to defaults? (User Expectations — evidence doesn't cover the return navigation behavior.)",
+      "Is there any 'out of stock' or quantity state for items? The page has no stock indicator — can a user add an item to cart that is no longer available, and what happens?",
+      "The screenshot shows the product image cropped at the top and bottom — is the image presented at its correct aspect ratio (1200×1500 per the src filename) or is it being clipped by a fixed-height container?",
+      "What happens if the `?id=` parameter references a non-existent item — does the app show a graceful 'not found' state or a broken/blank page? (CRUD-Read: missing record handling)"
+    ]
+  }
+]

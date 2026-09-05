@@ -1,0 +1,11 @@
+{
+  "forms": [
+    {
+      "formId": "newItemForm",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": false,
+      "errorIndicatorShown": true
+    }
+  ],
+  "cancelButtonProbes": []
+}

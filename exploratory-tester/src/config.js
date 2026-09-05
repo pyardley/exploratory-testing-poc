@@ -72,5 +72,20 @@ export function loadConfig(argv = process.argv.slice(2)) {
     maxBudgetUsd: args["max-budget-usd"] || "0.50",
     skipAi: Boolean(args["skip-ai"]),
     readOnly: Boolean(args["read-only"]),
+    // Optional path to a Playwright storageState JSON (cookies/localStorage) for
+    // sites that require a login before there's anything to explore. Generated
+    // out-of-band (this tool doesn't do login flows itself) via a plain Playwright
+    // script: log in once, context.storageState({path}). Added specifically
+    // because the first non-WidgetWorks site this was pointed at (Sauce Demo)
+    // exposed that gap — see FINDINGS.md.
+    storageStatePath: args["storage-state"] ? path.resolve(args["storage-state"]) : null,
+    // Optional generic login bootstrap: some sites (Sauce Demo among them)
+    // don't honor a pre-set session cookie on load — the client-side app only
+    // routes away from the login view in response to an actual form submit.
+    // Best-effort generic selectors (a password-type input, and the first
+    // text/email input sharing its form) rather than site-specific ones.
+    loginUrl: args["login-url"] || null,
+    loginUsername: args["login-username"] || null,
+    loginPassword: args["login-password"] || null,
   };
 }

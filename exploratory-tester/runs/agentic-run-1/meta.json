@@ -1,0 +1,14 @@
+{
+  "runId": "agentic-run-1",
+  "baseUrl": "http://localhost:4173",
+  "goldenUrl": "http://localhost:4173/index.html",
+  "mode": "agentic-mcp-browsing",
+  "checklistPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\checklist\\few-hiccupss-crud-checklist.md",
+  "charterPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\charter\\exploratory-charter.md",
+  "appDescPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\app-spec\\test-app-description.md",
+  "startedAt": "2026-09-05T11:17:43.931Z",
+  "totalCostUsd": 3.0430444500000005,
+  "totalWallClockMs": 1402078,
+  "tasksRun": 6,
+  "tasksSucceeded": 6
+}

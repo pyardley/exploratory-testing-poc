@@ -1,0 +1,35 @@
+{
+  "facts": {
+    "logo": {
+      "src": "/img/logo.svg",
+      "width": 160,
+      "height": 40,
+      "aspectRatio": 4,
+      "hasLinkWrapper": false
+    },
+    "primaryButton": {
+      "text": "Save changes",
+      "backgroundColor": "rgb(44, 111, 187)",
+      "borderRadius": "6px"
+    },
+    "bodyFontFamily": "Inter, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "hasInterFontLink": false,
+    "hasFaviconLink": true
+  },
+  "deviationsFromGolden": [
+    {
+      "type": "logo-not-linked",
+      "heuristics": [
+        "Familiarity"
+      ],
+      "description": "Header logo is not wrapped in a link, unlike the golden reference page."
+    },
+    {
+      "type": "webfont-not-imported",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "This page does not import the brand typeface (Inter) via the Google Fonts link the golden reference page uses — text is likely rendering in a fallback system font instead."
+    }
+  ]
+}

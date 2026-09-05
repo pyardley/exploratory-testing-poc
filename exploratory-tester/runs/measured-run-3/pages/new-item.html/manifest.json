@@ -1,0 +1,37 @@
+{
+  "url": "http://localhost:4173/new-item.html",
+  "slug": "new-item.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Add Widget — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Add a widget"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 0,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [
+      {
+        "formId": "newItemForm",
+        "submittedEmpty": true,
+        "networkRequestFiredOnEmptySubmit": false,
+        "errorIndicatorShown": true
+      }
+    ],
+    "cancelButtonProbes": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/new-item.html/screenshot-full.png",
+    "domSnapshot": "pages/new-item.html/dom-snapshot.html",
+    "textContent": "pages/new-item.html/text-content.txt"
+  }
+}

@@ -1,5 +1,6 @@
 const COLOR_DISTANCE_THRESHOLD = 12;
 const ASPECT_RATIO_TOLERANCE = 0.05;
+const SPACING_TOLERANCE_PX = 2;
 
 function parseRgb(str) {
   const m = /rgba?\(([^)]+)\)/.exec(str || "");
@@ -11,6 +12,21 @@ function parseRgb(str) {
 function colorDistance(a, b) {
   if (!a || !b) return null;
   return Math.sqrt((a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2);
+}
+
+function parsePx(str) {
+  const n = parseFloat(str || "");
+  return Number.isNaN(n) ? null : n;
+}
+
+function maxAbsDiffPx(a, b) {
+  // Compares two CSS shorthand strings (e.g. padding "8px 16px") side by side,
+  // token by token, and returns the largest single-side difference in px.
+  if (!a || !b) return null;
+  const av = a.split(/\s+/).map(parsePx);
+  const bv = b.split(/\s+/).map(parsePx);
+  if (av.some((v) => v === null) || bv.some((v) => v === null) || av.length !== bv.length) return null;
+  return Math.max(...av.map((v, i) => Math.abs(v - bv[i])));
 }
 
 export async function extractVisualFacts(page) {
@@ -40,12 +56,21 @@ export async function extractVisualFacts(page) {
           text: primaryBtn.textContent.trim(),
           backgroundColor: getComputedStyle(primaryBtn).backgroundColor,
           borderRadius: getComputedStyle(primaryBtn).borderRadius,
+          padding: getComputedStyle(primaryBtn).padding,
         }
       : null;
+
+    const container = document.querySelector(".container");
+    const containerPadding = container ? getComputedStyle(container).paddingLeft : null;
+
+    const formField = document.querySelector(".form-field");
+    const formFieldSpacing = formField ? getComputedStyle(formField).marginBottom : null;
 
     return {
       logo,
       primaryButton,
+      containerPadding,
+      formFieldSpacing,
       bodyFontFamily: computedOf("body", "fontFamily"),
       // Deliberately a structural check (does the page declare the web font
       // dependency at all), not document.fonts.check() — that API also matches
@@ -98,6 +123,32 @@ export function compareToGolden(pageFacts, goldenFacts) {
         description: `Primary/submit button border-radius (${pageFacts.primaryButton.borderRadius}) differs from the golden reference (${goldenFacts.primaryButton.borderRadius}).`,
       });
     }
+    const btnPaddingDiff = maxAbsDiffPx(pageFacts.primaryButton.padding, goldenFacts.primaryButton.padding);
+    if (btnPaddingDiff !== null && btnPaddingDiff > SPACING_TOLERANCE_PX) {
+      deviations.push({
+        type: "primary-button-padding-drift",
+        heuristics: ["Comparable Products"],
+        description: `Primary/submit button padding (${pageFacts.primaryButton.padding}) differs from the golden reference (${goldenFacts.primaryButton.padding}) by up to ${btnPaddingDiff.toFixed(1)}px.`,
+      });
+    }
+  }
+
+  const containerDiff = Math.abs((parsePx(pageFacts.containerPadding) ?? NaN) - (parsePx(goldenFacts.containerPadding) ?? NaN));
+  if (!Number.isNaN(containerDiff) && containerDiff > SPACING_TOLERANCE_PX) {
+    deviations.push({
+      type: "container-padding-drift",
+      heuristics: ["Comparable Products", "Image"],
+      description: `Page container horizontal padding (${pageFacts.containerPadding}) differs from the golden reference (${goldenFacts.containerPadding}) by ${containerDiff.toFixed(1)}px — layout rhythm doesn't match.`,
+    });
+  }
+
+  const formFieldDiff = Math.abs((parsePx(pageFacts.formFieldSpacing) ?? NaN) - (parsePx(goldenFacts.formFieldSpacing) ?? NaN));
+  if (!Number.isNaN(formFieldDiff) && formFieldDiff > SPACING_TOLERANCE_PX) {
+    deviations.push({
+      type: "form-field-spacing-drift",
+      heuristics: ["Comparable Products"],
+      description: `Spacing between form fields (${pageFacts.formFieldSpacing}) differs from the golden reference's form spacing (${goldenFacts.formFieldSpacing}) by ${formFieldDiff.toFixed(1)}px.`,
+    });
   }
 
   if (goldenFacts.hasInterFontLink === true && pageFacts.hasInterFontLink === false) {

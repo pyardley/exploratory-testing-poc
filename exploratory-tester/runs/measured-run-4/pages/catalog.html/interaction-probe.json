@@ -1,0 +1,45 @@
+{
+  "directionalControls": [
+    {
+      "controlId": "custom-dropdown-0",
+      "optionsProbed": [
+        "Name (A–Z)",
+        "Price: Low to High",
+        "Price: High to Low"
+      ],
+      "allSelectionsProducedIdenticalContent": false,
+      "someSelectionsProducedNoChange": [],
+      "directionClaimMismatch": {
+        "label": "Price: Low to High",
+        "claimedDirection": "asc",
+        "observedValues": [
+          42,
+          34.99,
+          29.99,
+          27,
+          22.5,
+          19.9,
+          18.4,
+          16.8
+        ]
+      }
+    }
+  ],
+  "searchProbes": [
+    {
+      "inputId": "searchInput",
+      "typedNonsenseQuery": true,
+      "contentChangedAtAll": false
+    }
+  ],
+  "paginationProbes": [
+    {
+      "control": "next",
+      "statusBefore": "Page 1 of 3",
+      "statusAfter": "Page 1 of 3",
+      "contentChanged": false,
+      "statusChanged": false
+    }
+  ],
+  "checkboxRoundTrip": []
+}

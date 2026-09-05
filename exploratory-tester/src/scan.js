@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceBundle, slugForUrl } from "./evidence/bundleBuilder.js";
-import { runCrawler } from "./scanners/crawler.js";
+import { runCrawler, reachPage } from "./scanners/crawler.js";
 import { attachConsoleNetworkCapture } from "./scanners/consoleNetwork.js";
 import { runAccessibilityScan } from "./scanners/accessibility.js";
 import { extractVisualFacts, compareToGolden } from "./scanners/visualConsistency.js";
@@ -10,6 +10,7 @@ import { extractNav, compareNavToGolden } from "./scanners/navConsistency.js";
 import { runFormValidationProbe } from "./scanners/formValidation.js";
 import { extractContent } from "./scanners/contentExtractor.js";
 import { runCrudSmoke } from "./scanners/crudSmoke.js";
+import { runInteractionProbe, probeCheckboxRoundTrip } from "./scanners/interactionProbe.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,24 +40,93 @@ function dedupePagesByPathname(pages) {
   return Array.from(byPathname.values());
 }
 
+/** Navigates to a crawled page for evidence capture, using click-path
+ * reconstruction (see crawler.js's reachPage) when the page isn't directly
+ * navigable by URL — the same fallback the crawler itself used to discover it. */
+async function gotoPageRecord(page, record) {
+  if (!record.clickPath || record.clickPath.length === 0) {
+    return page.goto(record.url, { waitUntil: "networkidle", timeout: 20000 });
+  }
+  return reachPage(page, { rootUrl: record.rootUrl, clickPath: record.clickPath }, { timeout: 20000 });
+}
+
+/**
+ * Best-effort generic login: some sites don't honor a pre-set session cookie
+ * on load — the client-side app only navigates away from the login view in
+ * response to an actual form submission (discovered pointing this at Sauce
+ * Demo — see FINDINGS.md). Uses a password-type input as the reliable anchor
+ * (there's no ambiguity about which field that is) and the first visible
+ * text/email input on the same form as the username field, rather than any
+ * site-specific selector.
+ */
+async function performLoginBootstrap(context, { loginUrl, loginUsername, loginPassword }) {
+  const page = await context.newPage();
+  await page.goto(loginUrl, { waitUntil: "networkidle", timeout: 20000 });
+
+  const passwordField = page.locator('input[type="password"]').first();
+  await passwordField.waitFor({ timeout: 10000 });
+  const usernameField = page
+    .locator('input[type="text"], input[type="email"], input:not([type])')
+    .first();
+
+  await usernameField.fill(loginUsername);
+  await passwordField.fill(loginPassword);
+
+  const submitBtn = page.locator('button[type="submit"], input[type="submit"]').first();
+  if ((await submitBtn.count()) > 0) {
+    await submitBtn.click();
+  } else {
+    await passwordField.press("Enter");
+  }
+  await page.waitForLoadState("networkidle").catch(() => {});
+
+  return { page, landedUrl: page.url() };
+}
+
 export async function runScan(config) {
   const runDir = path.join(__dirname, "..", "runs", config.runId);
   const bundle = new EvidenceBundle(runDir);
 
   const browser = await chromium.launch();
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const contextOptions = { viewport: { width: 1280, height: 900 } };
+  if (config.storageStatePath) {
+    console.log(`[scan] loading pre-authenticated storage state from ${config.storageStatePath}`);
+    contextOptions.storageState = config.storageStatePath;
+  }
+  const context = await browser.newContext(contextOptions);
 
-  console.log(`[scan] crawling from ${config.baseUrl} ...`);
-  const crawlResult = await runCrawler(context, config.baseUrl);
+  let crawlStartUrl = config.baseUrl;
+  let loginPage = null;
+  if (config.loginUrl) {
+    console.log(`[scan] performing login bootstrap at ${config.loginUrl} ...`);
+    const loginResult = await performLoginBootstrap(context, config);
+    crawlStartUrl = loginResult.landedUrl;
+    loginPage = loginResult.page;
+    console.log(`[scan] login landed on ${crawlStartUrl}, crawling from there`);
+  }
+
+  console.log(`[scan] crawling from ${crawlStartUrl} ...`);
+  const crawlResult = await runCrawler(context, crawlStartUrl, { existingPage: loginPage });
   bundle.writeJson("crawler-report.json", crawlResult);
-  console.log(`[scan] discovered ${crawlResult.pages.length} pages, ${crawlResult.brokenLinks.length} broken links, ${crawlResult.brokenAssets.length} broken assets`);
+  console.log(
+    `[scan] discovered ${crawlResult.pages.length} pages, ${crawlResult.brokenLinks.length} broken links, ${crawlResult.brokenAssets.length} broken assets` +
+      (crawlResult.spaRoutedPages.length ? `, ${crawlResult.spaRoutedPages.length} reached via SPA click-path reconstruction` : "")
+  );
 
   const goldenUrl = new URL(config.goldenPath, config.baseUrl + "/").toString();
 
-  // Golden facts pass (no evidence capture needed beyond the facts themselves)
+  // Golden facts pass (no evidence capture needed beyond the facts themselves).
+  // If the golden page turned out to be an SPA-routed view (not directly
+  // navigable — the crawler already worked that out while discovering it),
+  // reuse its click-path reconstruction instead of a plain goto that would 404.
   console.log(`[scan] extracting golden reference facts from ${goldenUrl} ...`);
+  const goldenRecord = crawlResult.allVisited.find((p) => p.url === goldenUrl);
   const goldenPage = await context.newPage();
-  await goldenPage.goto(goldenUrl, { waitUntil: "networkidle" });
+  if (goldenRecord) {
+    await gotoPageRecord(goldenPage, goldenRecord);
+  } else {
+    await goldenPage.goto(goldenUrl, { waitUntil: "networkidle" });
+  }
   const goldenVisualFacts = await extractVisualFacts(goldenPage);
   const goldenNav = await extractNav(goldenPage);
   await goldenPage.close();
@@ -65,15 +135,16 @@ export async function runScan(config) {
   const dedupedPages = dedupePagesByPathname(crawlResult.pages);
   console.log(`[scan] ${crawlResult.pages.length} URLs crawled, deduped to ${dedupedPages.length} distinct templates for the evidence/AI pass`);
 
-  for (const { url, variantUrls } of dedupedPages) {
+  for (const pageRecord of dedupedPages) {
+    const { url, variantUrls } = pageRecord;
     const slug = slugForUrl(config.baseUrl, url);
-    console.log(`[scan] page: ${url}`);
+    console.log(`[scan] page: ${url}${pageRecord.reachedVia === "client-side-navigation" ? " (SPA-routed, reached via click-path replay)" : ""}`);
     const page = await context.newPage();
     const capture = attachConsoleNetworkCapture(page);
 
     let navError = null;
     try {
-      await page.goto(url, { waitUntil: "networkidle", timeout: 20000 });
+      await gotoPageRecord(page, pageRecord);
     } catch (err) {
       navError = String(err.message || err);
     }
@@ -99,6 +170,16 @@ export async function runScan(config) {
 
     const formProbe = await runFormValidationProbe(page).catch((err) => ({ error: String(err.message || err) }));
 
+    // Interaction probing runs after evidence capture (it clicks/types/mutates
+    // the page) and after formValidation (both mutate, so keep them sequential
+    // and off the golden-page pass — golden has none of these controls).
+    let interactionProbe = { directionalControls: [], searchProbes: [], paginationProbes: [] };
+    let checkboxRoundTrip = [];
+    if (!config.readOnly) {
+      interactionProbe = await runInteractionProbe(page, url).catch((err) => ({ error: String(err.message || err) }));
+      checkboxRoundTrip = await probeCheckboxRoundTrip(page, url).catch((err) => [{ error: String(err.message || err) }]);
+    }
+
     const consoleNetworkResults = capture.getResults();
     const visualDeviations = visualFacts ? compareToGolden(visualFacts, goldenVisualFacts) : [];
     const navDeviations = nav ? compareNavToGolden(nav, goldenNav) : [];
@@ -112,10 +193,12 @@ export async function runScan(config) {
     bundle.writePageJson(slug, "visual-facts.json", { facts: visualFacts, deviationsFromGolden: visualDeviations });
     bundle.writePageJson(slug, "nav.json", { nav, deviationsFromGolden: navDeviations });
     bundle.writePageJson(slug, "form-validation.json", formProbe);
+    bundle.writePageJson(slug, "interaction-probe.json", { ...interactionProbe, checkboxRoundTrip });
 
     const manifest = {
       url,
       slug,
+      reachedVia: pageRecord.reachedVia || "direct-nav",
       otherUrlsSharingThisTemplate: variantUrls.filter((u) => u !== url),
       title: content?.title || null,
       navError,
@@ -132,6 +215,7 @@ export async function runScan(config) {
       visualDeviationsFromGolden: visualDeviations,
       navDeviationsFromGolden: navDeviations,
       formValidationFindings: formProbe,
+      interactionProbeFindings: { ...interactionProbe, checkboxRoundTrip },
       evidenceFiles: {
         screenshot: `pages/${slug}/screenshot-full.png`,
         domSnapshot: `pages/${slug}/dom-snapshot.html`,

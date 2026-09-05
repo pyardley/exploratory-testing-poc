@@ -1,0 +1,26 @@
+{
+  "facts": {
+    "logo": {
+      "src": "/img/logo.svg",
+      "width": 160,
+      "height": 40,
+      "aspectRatio": 4,
+      "hasLinkWrapper": true
+    },
+    "primaryButton": null,
+    "containerPadding": "24px",
+    "formFieldSpacing": "24px",
+    "bodyFontFamily": "Inter, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "hasInterFontLink": true,
+    "hasFaviconLink": false
+  },
+  "deviationsFromGolden": [
+    {
+      "type": "missing-favicon",
+      "heuristics": [
+        "Image"
+      ],
+      "description": "This page has no favicon link, unlike the golden reference page."
+    }
+  ]
+}

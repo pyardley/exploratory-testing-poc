@@ -1,0 +1,35 @@
+{
+  "url": "http://localhost:4173/index.html",
+  "slug": "index.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "WidgetWorks — Quality parts for makers and builders",
+  "navError": null,
+  "headings": [
+    "Quality parts for makers and builders",
+    "Why builders choose WidgetWorks",
+    "Curated selection",
+    "Fast answers",
+    "Always current",
+    "WidgetWorks by the numbers"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2026 WidgetWorks",
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 0,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/index.html/screenshot-full.png",
+    "domSnapshot": "pages/index.html/dom-snapshot.html",
+    "textContent": "pages/index.html/text-content.txt"
+  }
+}

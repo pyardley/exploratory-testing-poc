@@ -1,0 +1,659 @@
+[
+  {
+    "task": "home-and-about",
+    "ok": true,
+    "structured": {
+      "areaExplored": "Home page (http://localhost:4173/index.html) and About page (http://localhost:4173/about.html) — all visible text claims, statistics, founding dates, copyright, brand color, and logo rendering.",
+      "actionsPerformed": [
+        "Navigated to http://localhost:4173 (Home page)",
+        "Captured full-page accessibility snapshot of Home page",
+        "Captured full-page screenshot of Home page",
+        "Collected console errors on Home page",
+        "Navigated to http://localhost:4173/about.html (About page)",
+        "Captured full-page accessibility snapshot of About page",
+        "Captured full-page screenshot of About page",
+        "Evaluated computed color of About page paragraph text via JS",
+        "Evaluated CSS custom properties (--color-primary, --color-text) on About page via JS",
+        "Navigated back to Home page",
+        "Evaluated CSS custom properties (--color-primary, --color-text) on Home page via JS"
+      ],
+      "toolReliabilityNotes": "The very first browser_navigate call returned a tool-not-found error; the identical call on retry succeeded immediately. All subsequent tool calls worked without issue. Console error on both pages was ERR_BLOCKED_BY_CLIENT for the Google Fonts URL — an ad-blocker block in the test browser, not an application defect. The About page screenshot showed paragraph text that appeared orange/amber visually, but computed style and CSS variable evaluation both confirmed the text color is rgb(26,26,26) / #1A1A1A on both pages — my initial visual interpretation was likely affected by screenshot compression or perceived contrast against the background. I trusted the computed values over my visual impression for the color-of-text question.",
+      "findings": [
+        {
+          "observation": "About page claims 'Founded in 2018, WidgetWorks has been serving customers for over 15 years.' The current date is 2026-09-05. 2026 − 2018 = 8 years — not 15. The claim is factually wrong by roughly 7 years.",
+          "heuristics": [
+            "World",
+            "History",
+            "Claims"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Exact text read from About page snapshot: 'Founded in 2018, WidgetWorks has been serving customers for over 15 years with a simple idea: hardware and parts should be easy to find, accurately described, and reliably in stock.' Current date confirmed as 2026-09-05 via system context."
+        },
+        {
+          "observation": "About page says 'Proudly serving our first 500 customers since 2018.' Home page says 'Trusted by over 10,000 happy customers' in hero text and '10k+ Customers served' in the stats section. The two pages directly contradict each other on how many customers the company has served — 500 vs 10,000+.",
+          "heuristics": [
+            "Claims",
+            "History",
+            "World"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Home page snapshot: paragraph ref=e22 reads '...Trusted by over 10,000 happy customers.' Stats section ref=e48/e49 reads '10k+ / Customers served.' About page snapshot: paragraph ref=f1e23 reads 'Proudly serving our first 500 customers since 2018...'"
+        },
+        {
+          "observation": "The About page footer reads '© 2019 WidgetWorks', while the Home page footer reads '© 2026 WidgetWorks'. The About page copyright year is 7 years out of date and inconsistent with the canonical Home page.",
+          "heuristics": [
+            "History",
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Home page snapshot ref=e52: '© 2026 WidgetWorks'. About page snapshot ref=f1e31: '© 2019 WidgetWorks'. Both confirmed in screenshots."
+        },
+        {
+          "observation": "The CSS custom property --color-primary differs between the Home page (#3B6FA0) and the About page (#2C6FBB). Per the charter, the Home page is the canonical brand reference. The About page uses a noticeably more saturated blue (higher blue channel: 187 vs 160), making interactive elements rendered with this token appear a different shade on About than on Home.",
+          "heuristics": [
+            "Image",
+            "Comparable Products",
+            "Familiarity"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Evaluated via getComputedStyle(document.documentElement). Home page returned --color-primary: #3B6FA0. About page returned --color-primary: #2C6FBB. Both calls made immediately after page load with no navigation between."
+        },
+        {
+          "observation": "The About page displays a badge reading 'Since 2018-06-01' — a raw ISO 8601 date string (YYYY-MM-DD) presented as user-facing marketing copy. A typical customer would expect a formatted date like 'June 2018' or 'June 1, 2018', not a machine-format string.",
+          "heuristics": [
+            "Explainability",
+            "User Expectations",
+            "Image"
+          ],
+          "severity": "low",
+          "confidence": "medium",
+          "evidenceNote": "Seen in About page snapshot ref=f1e25 as text content 'Since 2018-06-01', and visible in screenshot as a pill-shaped badge alongside 'Carbon-neutral shipping on every order'."
+        }
+      ]
+    },
+    "rawResultText": "## Summary\n\nFive findings across the Home and About pages:\n\n| # | Severity | Finding |\n|---|---|---|\n| 1 | **High** | About page claims \"over 15 years\" of service from a 2018 founding — mathematically 8 years, not 15 |\n| 2 | **High** | Customer count contradiction: About says \"first 500 customers,\" Home says \"10,000+ customers served\" |\n| 3 | **Medium** | Copyright year mismatch: About footer shows © 2019, Home footer shows © 2026 |\n| 4 | **Medium** | Brand primary color inconsistency: Home `--color-primary` is `#3B6FA0`, About is `#2C6FBB` — different shades of blue |\n| 5 | **Low** | \"Since 2018-06-01\" badge exposes a raw ISO date string in user-facing marketing copy |\n\nThe two high-severity findings are clear-cut factual contradictions within the live copy. The primary color divergence (finding 4) is confirmed by computed style evaluation — the About page has drifted from the canonical Home page brand token.",
+    "costUsd": 0.40679309999999996,
+    "numTurns": 15,
+    "durationMs": 211080,
+    "wallClockMs": 216235
+  },
+  {
+    "task": "catalog-interactions",
+    "ok": true,
+    "structured": {
+      "areaExplored": "Catalog page (http://localhost:4173/catalog.html) — sort control (all three options), search box, pagination (Next/Previous), Download catalog (PDF) control, product card images and alt text, sort dropdown accessibility, price formatting, footer copyright, and brand color consistency against the Home page baseline.",
+      "actionsPerformed": [
+        "Navigated to http://localhost:4173 and took baseline screenshot of Home page",
+        "Navigated to http://localhost:4173/catalog.html and took snapshot",
+        "Collected browser console errors",
+        "Opened sort dropdown and clicked 'Price: Low to High', recorded resulting item order",
+        "Opened sort dropdown and clicked 'Price: High to Low', recorded resulting item order",
+        "Opened sort dropdown and clicked 'Name (A–Z)' to reset",
+        "Typed 'bolt' into search box and waited 1.5 seconds to check for live filtering",
+        "Pressed Enter in search box to check for submit-triggered filtering",
+        "Clicked 'Next' pagination button and recorded resulting page/item state",
+        "Cleared search box, clicked 'Next' again to isolate pagination behavior",
+        "Clicked 'Download catalog (PDF)' link and observed resulting URL change",
+        "Took screenshot of catalog cards",
+        "Evaluated DOM to retrieve all img elements: src, alt, naturalWidth, broken state",
+        "Evaluated DOM to retrieve sort control HTML structure and ARIA attributes",
+        "Evaluated DOM to retrieve Previous button disabled state and CSS custom property --color-primary on catalog page",
+        "Navigated to http://localhost:4173/index.html and evaluated --color-primary and footer text on Home page"
+      ],
+      "toolReliabilityNotes": "The first call to mcp__playwright__browser_navigate failed with 'No such tool available' but succeeded on the immediate retry with no changes — likely a brief initialization delay. All subsequent tool calls worked correctly. browser_triple_click is not available; used click + keyboard shortcut workaround to clear the search field. The console_messages tool reliably surfaced the 404 image error and the font-blocking error. browser_evaluate was essential for checking ARIA attributes, broken image state, and CSS custom property values — the accessibility snapshot alone was insufficient for those checks.",
+      "findings": [
+        {
+          "observation": "Sort option 'Price: Low to High' produces a descending order (highest price first). Observed order: Cable Tension Meter $42.00, Precision Dial Gauge $34.99, Laser Distance Meter $29.99 … Carbon Fiber Spacer Kit $16.80. This is high-to-low, not low-to-high. Additionally, 'Price: High to Low' produces the IDENTICAL result set and order — both price sort options are functionally the same. The DOM attribute is data-sort='price-asc' for the Low to High option, confirming the label is intentionally ascending but the rendering logic is inverted.",
+          "heuristics": [
+            "User Expectations",
+            "Claims",
+            "CRUD-Read"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "After selecting 'Price: Low to High': first card = Cable Tension Meter $42.000, last visible card = Carbon Fiber Spacer Kit $16.800. After selecting 'Price: High to Low': identical sequence — Cable Tension Meter $42.000 through Carbon Fiber Spacer Kit $16.800. Snapshot refs f1e83/f1e158 confirm the same DOM element order for both sort selections."
+        },
+        {
+          "observation": "The search box ('Search widgets…') does not filter catalog results. Typing 'bolt' and waiting 1.5 seconds produced no change — all 8 items on page 1 remained visible, including items with no relation to 'bolt'. Pressing Enter also had no effect. The search control is visually present and accepts input but is not wired to any filtering logic.",
+          "heuristics": [
+            "Purpose",
+            "User Expectations",
+            "CRUD-Read"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Before search: 8 items including 'Anodized Standoff Set', 'Anti-Vibration Washer Set', 'Aurora Hex Bolt Set', etc. After typing 'bolt' and waiting 1.5s + pressing Enter: identical 8 items in identical order. Page counter unchanged at 'Page 1 of 3'."
+        },
+        {
+          "observation": "The 'Next' pagination button does not advance to page 2. After clicking it — both with 'bolt' still in the search box and after clearing it — the display remains 'Page 1 of 3' with the same 8 items unchanged. The button appears active and clickable but is non-functional.",
+          "heuristics": [
+            "Purpose",
+            "User Expectations",
+            "CRUD-Read"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Page counter read 'Page 1 of 3' before and after two separate clicks of 'Next' (snapshot refs f1e70 both times). Item list refs unchanged (f1e159, f1e164, f1e169…) confirming no re-render occurred."
+        },
+        {
+          "observation": "'Download catalog (PDF)' is a dead link. Clicking it changes the URL from /catalog.html to /catalog.html# (a fragment navigation to the top of the page) and nothing else happens — no file download, no new tab, no modal, no error message. The href attribute is literally '#'.",
+          "heuristics": [
+            "Purpose",
+            "Claims"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Before click: URL was http://localhost:4173/catalog.html. After click: URL became http://localhost:4173/catalog.html#. No download dialog appeared, no network request for a PDF file was triggered. Snapshot confirmed href='#' on ref f1e25."
+        },
+        {
+          "observation": "The product image for 'Cable Tension Meter' (w-024) is broken — the file at /img/widgets-missing/w-024.svg returns a 404. The path itself contains the directory name 'widgets-missing', which is suspicious and suggests this may be an intentionally misconfigured test case, but the result to a real user is a broken image icon in the catalog card.",
+          "heuristics": [
+            "Image",
+            "CRUD-Read"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Console error: 'Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4173/img/widgets-missing/w-024.svg'. DOM evaluation confirmed naturalWidth=0, naturalHeight=0, broken=true for that img element. All other 7 visible card images loaded correctly (naturalWidth=300)."
+        },
+        {
+          "observation": "All 8 product card images have alt=\"\" (empty alt text). Product photos on a catalog are informational — they convey what the item looks like, which is meaningful to a customer. Empty alt text means screen readers skip these images entirely, providing no product visual context to users who rely on assistive technology.",
+          "heuristics": [
+            "Statutes/Standards",
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "DOM evaluation of all img elements returned alt: '' for every product card image (w-009, w-021, w-001, w-022, w-017, w-006, w-024, w-013). Only the logo had meaningful alt text ('WidgetWorks')."
+        },
+        {
+          "observation": "The sort dropdown is built entirely from unsemantic div elements with no ARIA attributes. The outer wrapper (.sort-dropdown div) and the trigger (.sort-trigger div) have no role, no aria-expanded, no aria-haspopup, and no tabindex. The option items (div[data-sort]) have no role='option' or aria-selected. The control cannot be operated by keyboard alone and is invisible to screen readers.",
+          "heuristics": [
+            "Statutes/Standards",
+            "Familiarity"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "DOM evaluation returned: role=null, ariaLabel=null, ariaExpanded=null, tabIndex=null on the sort-dropdown div. Full outerHTML confirmed: <div class='sort-dropdown'><div class='sort-trigger'>...<div data-sort='name-asc'>Name (A-Z)</div> etc. — plain divs throughout with no ARIA semantics."
+        },
+        {
+          "observation": "All prices on the catalog cards are displayed with 3 decimal places (e.g. $14.200, $6.200, $42.000, $5.500). Standard USD currency formatting uses exactly 2 decimal places. The third zero is meaningless and looks like a formatting defect — it would concern a customer wondering if something unusual is being expressed.",
+          "heuristics": [
+            "World",
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Snapshot shows prices as '$14.200', '$6.200', '$12.500', '$10.400', '$5.500', '$4.100', '$42.000', '$16.800' on 8 separate product cards. Every single price has 3 decimal places."
+        },
+        {
+          "observation": "The Catalog page footer reads '© 2019 WidgetWorks', while the Home page footer reads '© 2026 WidgetWorks'. This is a 7-year discrepancy. Either the catalog footer is 7 years stale, or one of them is hardcoded incorrectly. Both cannot be correct simultaneously.",
+          "heuristics": [
+            "History",
+            "Image",
+            "Claims"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Catalog page snapshot ref f1e74: '© 2019 WidgetWorks'. Home page DOM evaluation: footerText = '© 2026 WidgetWorks'. Both observed in the same session."
+        },
+        {
+          "observation": "The Catalog page uses a different primary brand color than the Home page. Home page has --color-primary: #3B6FA0 (a muted medium blue). Catalog page has --color-primary: #2C6FBB (a brighter, more saturated blue). These are visually distinct and the charter explicitly states every page must match the Home page's single visual identity.",
+          "heuristics": [
+            "Image",
+            "Familiarity",
+            "Comparable Products"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "DOM evaluation on catalog page returned --color-primary = '#2C6FBB'. DOM evaluation on home page returned --color-primary = '#3B6FA0'. Both evaluated in the same browser session using getComputedStyle(document.documentElement).getPropertyValue('--color-primary')."
+        },
+        {
+          "observation": "The 'Previous' pagination button on page 1 is not disabled and has no aria-disabled attribute. On the first page of results there is no previous page, so the button should be visually and functionally disabled. As-is, a user can click it (though it appears to no-op), and a screen reader has no indication the control is unavailable.",
+          "heuristics": [
+            "User Expectations",
+            "Familiarity",
+            "Statutes/Standards"
+          ],
+          "severity": "low",
+          "confidence": "high",
+          "evidenceNote": "DOM evaluation on page 1 returned prevDisabled: false, prevAriaDisabled: null for the 'Previous' button. The page counter confirmed 'Page 1 of 3'."
+        }
+      ]
+    },
+    "rawResultText": "## Session complete — findings summary\n\nEleven findings logged across the Catalog page. Here's a quick orientation:\n\n**Three high-severity, non-debatable functional failures:**\n- **Sort inverted** — \"Price: Low to High\" sorts high-to-low; both price options produce identical descending output.\n- **Search dead** — typing in the search box and pressing Enter does nothing; the control is not wired up.\n- **Pagination dead** — clicking Next does nothing; the page counter never advances past \"Page 1 of 3\".\n\n**Five medium-severity issues:**\n- \"Download catalog (PDF)\" is a `href=\"#\"` stub — no file is generated or downloaded.\n- Missing image for item w-024 (Cable Tension Meter) — 404 from a path containing the folder name `widgets-missing`.\n- All product card images have `alt=\"\"` — informational images invisible to screen readers.\n- Sort dropdown is plain `div` elements with no ARIA — not keyboard accessible, not screen-reader opaque.\n- Prices formatted with 3 decimal places (`$42.000`) — incorrect for USD.\n- Footer copyright year is 2019 on Catalog vs 2026 on Home — 7-year discrepancy.\n- Brand primary color differs between Home (`#3B6FA0`) and Catalog (`#2C6FBB`).\n\n**One low-severity issue:**\n- \"Previous\" button on page 1 is not disabled (neither `disabled` attribute nor `aria-disabled`).",
+    "costUsd": 0.7656873,
+    "numTurns": 42,
+    "durationMs": 324517,
+    "wallClockMs": 329495
+  },
+  {
+    "task": "create-widget-edge-cases",
+    "ok": true,
+    "structured": {
+      "areaExplored": "New Item form (price boundary testing) and Catalog page — including form submission behavior with a negative price, post-create verification via the catalog and API, search, pagination, price formatting, unit labeling, copyright footer, and broken image.",
+      "actionsPerformed": [
+        "Navigated to http://localhost:4173 and captured homepage snapshot",
+        "Navigated to /catalog.html and captured snapshot (noted footer, price formatting)",
+        "Navigated to /new-item.html and captured snapshot (noted weight unit mismatch)",
+        "Filled new-item form: name='Test Boundary Widget', category='Fasteners', description='A test widget with a boundary price value', price='-5.00', weight='2'",
+        "Clicked 'Save widget' button — page redirected to /catalog.html with no error or success message",
+        "Captured catalog snapshot — new widget not visible on page 1",
+        "Clicked 'Next' pagination button twice — page content and counter unchanged ('Page 1 of 3')",
+        "Typed 'Test Boundary' into catalog search box — results did not filter at all",
+        "Inspected network requests — found POST /api/widgets returned 200 OK",
+        "Retrieved POST request body: confirmed price sent as -5",
+        "Navigated to http://localhost:4173/api/widgets and evaluated body text — confirmed 24 widgets returned, Test Boundary Widget absent"
+      ],
+      "toolReliabilityNotes": "First call to mcp__playwright__browser_navigate returned 'No such tool available' and required a retry — worked on the second attempt. Ref-based selectors (e.g. button[ref=f2e34]) failed with 'Unknown engine' errors; CSS selectors worked fine instead. browser_network_request with part='response-body' for request #8 completed with no output — had to verify persistence by calling GET /api/widgets directly. Otherwise tools functioned as expected throughout the session.",
+      "findings": [
+        {
+          "observation": "Negative price (-5.00) accepted by new-item form with no validation error — widget silently not persisted",
+          "heuristics": [
+            "CRUD-Create",
+            "World",
+            "Explainability",
+            "User Expectations"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Filled price field with '-5.00', clicked 'Save widget'. Page redirected to /catalog.html with no error and no success message. Network: POST /api/widgets body was {price: -5, ...} and returned HTTP 200 OK. GET /api/widgets response body confirmed the widget (name='Test Boundary Widget') is not present — 24 original seed widgets only. No client-side or server-side rejection was surfaced to the user at any point."
+        },
+        {
+          "observation": "Search box is non-functional — typing a search term does not filter catalog results",
+          "heuristics": [
+            "Purpose",
+            "CRUD-Read"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Typed 'Test Boundary' into the 'Search widgets…' input. Accessibility snapshot showed all 8 original items still displayed, page counter still 'Page 1 of 3'. No filtering or API call occurred."
+        },
+        {
+          "observation": "Pagination 'Next' button does not advance the page — content and page counter unchanged after two clicks",
+          "heuristics": [
+            "Purpose",
+            "CRUD-Read"
+          ],
+          "severity": "high",
+          "confidence": "medium",
+          "evidenceNote": "Clicked 'Next' twice from /catalog.html. Each snapshot showed identical 8 items and 'Page 1 of 3'. On second click the button carried [active] state but content was unchanged. (Medium confidence because the accessibility snapshot may not capture a DOM update that occurred visually — but no content change was observed in either snapshot.)"
+        },
+        {
+          "observation": "Weight field label ('Weight (kg)') contradicts placeholder ('e.g. 12 lbs') — mixed units on the same field",
+          "heuristics": [
+            "World",
+            "Claims",
+            "Statutes/Standards"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "In the new-item form snapshot, the weight input's visible label (in a sibling generic element) reads 'Weight (kg)' while its placeholder reads 'e.g. 12 lbs'. kg and lbs are different units of mass; the guidance contradicts itself and will confuse what unit the user should enter."
+        },
+        {
+          "observation": "Catalog price display uses 3 decimal places for USD — non-standard currency formatting",
+          "heuristics": [
+            "World"
+          ],
+          "severity": "low",
+          "confidence": "high",
+          "evidenceNote": "Catalog cards show prices such as '$14.200', '$6.200', '$12.500', '$42.000'. USD currency conventionally uses exactly 2 decimal places. API returns the values as plain numbers (e.g. 14.2, 6.2), so the extra trailing zero is introduced by the display layer."
+        },
+        {
+          "observation": "Footer copyright year is '© 2019 WidgetWorks' on Catalog and New Item pages, but '© 2026 WidgetWorks' on the Home page",
+          "heuristics": [
+            "History",
+            "Image",
+            "Claims"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Home page footer: '© 2026 WidgetWorks'. Catalog page footer and New Item page footer both read '© 2019 WidgetWorks'. Today's date is 2026-09-05, so 2019 is also factually stale even if it were internally consistent."
+        },
+        {
+          "observation": "Widget w-024 (Cable Tension Meter) has a broken image — its imageUrl points to a missing file",
+          "heuristics": [
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Network requests log shows: GET /img/widgets-missing/w-024.svg => [404] Not Found. API data confirms imageUrl for w-024 is '/img/widgets-missing/w-024.svg' — the path itself contains 'widgets-missing', indicating a known missing asset that was never replaced."
+        }
+      ]
+    },
+    "rawResultText": "## Session summary\n\nHere's what I found, in plain language:\n\n---\n\n### F1 (High) — Negative price silently accepted and not saved\n**The most significant finding.** The new-item form accepted `price = -5.00` with no client-side or server-side validation error. The form submitted, the API returned HTTP 200, and the UI redirected to the catalog — all as if the save succeeded. But a direct GET of `/api/widgets` confirmed the widget was never persisted. The user has no way to know the create operation failed.\n- *Heuristics:* CRUD-Create, World, Explainability, User Expectations\n\n---\n\n### F2 (High) — Search box is completely dead\nTyping \"Test Boundary\" into the catalog search input produced no filtering whatsoever — the full original result set remained. No API request was triggered.\n- *Heuristics:* Purpose, CRUD-Read\n\n---\n\n### F3 (High / medium confidence) — Pagination \"Next\" button doesn't advance the page\nTwo clicks on \"Next\" produced no change in the displayed items or the page counter (\"Page 1 of 3\"). Logged as medium confidence since the accessibility snapshot could theoretically lag a visual update, but both snapshots were identical.\n- *Heuristics:* Purpose, CRUD-Read\n\n---\n\n### F4 (Medium) — Weight field label/placeholder unit mismatch\nThe visible label says **Weight (kg)**; the placeholder says **e.g. 12 lbs**. These are different units. Any value a user enters is ambiguous.\n- *Heuristics:* World, Claims, Statutes/Standards\n\n---\n\n### F5 (Medium) — Footer copyright year inconsistent and stale\nHome page: `© 2026`. Catalog and New Item pages: `© 2019`. The 2019 value is also factually seven years stale.\n- *Heuristics:* History, Image, Claims\n\n---\n\n### F6 (Medium) — Broken image for Cable Tension Meter (w-024)\nThe image URL in the API data is `/img/widgets-missing/w-024.svg` — the path name itself advertises the file is missing, and the server confirms it with a 404.\n- *Heuristics:* Image\n\n---\n\n### F7 (Low) — Price displayed with 3 decimal places\nCatalog shows `$14.200`, `$6.200`, `$12.500` etc. USD prices conventionally use exactly 2 decimal places.\n- *Heuristics:* World",
+    "costUsd": 0.4918282499999999,
+    "numTurns": 27,
+    "durationMs": 203626,
+    "wallClockMs": 208485
+  },
+  {
+    "task": "edit-widget-twice",
+    "ok": true,
+    "structured": {
+      "areaExplored": "Edit Item page (edit-item.html?id=w-009) — two sequential saves (first changing the Name field, second changing the Price field), with pre/post verification via the Item Detail page and direct API response inspection.",
+      "actionsPerformed": [
+        "Navigated to http://localhost:4173 (home page)",
+        "Clicked Catalog link → catalog.html",
+        "Noted footer copyright year discrepancy (© 2019 vs © 2026 on home page)",
+        "Clicked 'Anodized Standoff Set' item card → item.html?id=w-009",
+        "Noted price displayed as '$14.200' (3 decimal places)",
+        "Clicked 'Edit this widget' → edit-item.html?id=w-009",
+        "Recorded pre-save field values: Name='Anodized Standoff Set', Price='14.2'",
+        "Changed Name field to 'Anodized Standoff Set (Edited)'",
+        "Clicked 'Save changes' — observed no confirmation message, form remained unchanged",
+        "Inspected network requests: PATCH /api/widgets/w-009 returned 200 OK",
+        "Navigated to item.html?id=w-009 — name still showed original 'Anodized Standoff Set'",
+        "Returned to edit page — name field reloaded as original 'Anodized Standoff Set' (first save not persisted)",
+        "Changed Price field from 14.2 to 19.99",
+        "Clicked 'Save changes' again — again no confirmation message",
+        "Navigated to item.html?id=w-009 — price still showed '$14.200'",
+        "Inspected API GET /api/widgets/w-009 response body: confirmed name=original, price=14.2, updatedAt='2025-12-09T09:00:00.000Z' (unchanged)"
+      ],
+      "toolReliabilityNotes": "The first call to mcp__playwright__browser_navigate returned a 'No such tool available' error and had to be retried — it succeeded on the second attempt. A triple-click tool (mcp__playwright__browser_triple_click) does not exist; I worked around it with click + Ctrl+A + fill. Otherwise all tools worked as expected throughout the session. Network request filtering by URL pattern worked correctly for isolating API calls.",
+      "findings": [
+        {
+          "observation": "Saves silently fail: both PATCH requests returned HTTP 200 OK, but neither change (Name → 'Anodized Standoff Set (Edited)', Price → 19.99) was persisted. After each save the item detail page and the edit form reloaded with original values (name='Anodized Standoff Set', price=14.2). The API GET response body after both saves confirmed: name='Anodized Standoff Set', price=14.2, updatedAt='2025-12-09T09:00:00.000Z' (unchanged). The server accepted the writes and declared success but did not store the data.",
+          "heuristics": [
+            "CRUD-Update",
+            "Explainability",
+            "User Expectations"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "PATCH /api/widgets/w-009 → 200 OK (observed in network panel). Subsequent GET /api/widgets/w-009 response body: {\"name\":\"Anodized Standoff Set\",\"price\":14.2,\"updatedAt\":\"2025-12-09T09:00:00.000Z\"}. Neither the name edit nor the price edit appeared in this response. Item detail page continued to display original values on fresh navigation after both saves."
+        },
+        {
+          "observation": "No save confirmation or error feedback: after clicking 'Save changes' on both occasions, the edit form remained completely static — no toast, banner, inline message, redirect, or any visual change to indicate whether the save succeeded or failed. The user is left with no signal about the outcome of a write operation.",
+          "heuristics": [
+            "Explainability",
+            "User Expectations",
+            "CRUD-Update"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Accessibility snapshot taken immediately after each 'Save changes' click showed identical page structure — no new elements, no status text, no changed button state beyond the transient 'active' attribute on the button during the click."
+        },
+        {
+          "observation": "'updatedAt' timestamp exists in the API data model but is never shown in the UI. After both saves (which the server falsely acknowledged with 200 OK), the updatedAt remained '2025-12-09T09:00:00.000Z'. Even if saves worked, users would have no way to see when an item was last modified — neither the detail page nor the edit page surfaces this field.",
+          "heuristics": [
+            "History",
+            "CRUD-Update",
+            "Explainability"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "API GET response body contained: 'createdAt':'2025-12-09T09:00:00.000Z','updatedAt':'2025-12-09T09:00:00.000Z'. The item detail page only shows 'Added on 09/12/2025' (the addedOn field). No 'last modified' or 'last updated' field appears on detail or edit pages."
+        },
+        {
+          "observation": "Price is displayed with three decimal places ('$14.200') on both the catalog grid and item detail page. Standard USD currency formatting uses exactly two decimal places. This looks like a numeric formatting bug — the stored value is 14.2 but it is rendered as 14.200.",
+          "heuristics": [
+            "World",
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Catalog page snapshot showed '$14.200' in the card for Anodized Standoff Set. Item detail page paragraph showed '$14.200'. API response body confirmed the stored value is the number 14.2 (not a string), so the three-decimal rendering is a UI formatting issue."
+        },
+        {
+          "observation": "Copyright year is inconsistent across pages: the Home page footer shows '© 2026 WidgetWorks' while the Catalog, Item detail, and Edit item page footers all show '© 2019 WidgetWorks'. At least one of these is wrong, and the inconsistency itself undermines brand credibility.",
+          "heuristics": [
+            "History",
+            "Image",
+            "Claims"
+          ],
+          "severity": "low",
+          "confidence": "high",
+          "evidenceNote": "Home page (index.html) footer snapshot: '© 2026 WidgetWorks'. Catalog (catalog.html), item detail (item.html?id=w-009), and edit item (edit-item.html?id=w-009) footer snapshots all showed '© 2019 WidgetWorks'."
+        },
+        {
+          "observation": "The API data model includes a 'notes' field ('Color anodizing may vary slightly by batch.') that is not exposed in the edit form. The edit form only offers Name, Category, Description, Price (USD), and Weight (kg). Users have no way to create or edit notes via the UI.",
+          "heuristics": [
+            "Purpose",
+            "CRUD-Update"
+          ],
+          "severity": "low",
+          "confidence": "medium",
+          "evidenceNote": "API GET response for w-009 included: 'notes':'Color anodizing may vary slightly by batch.','notesPreview':'Color anodizing may vary slightly by batch.'. The edit-item.html form snapshot contained no notes or notesPreview field. The notes value is also not displayed on the item detail page, so it is inaccessible from the UI entirely."
+        }
+      ]
+    },
+    "rawResultText": null,
+    "costUsd": 0.4964868,
+    "numTurns": 31,
+    "durationMs": 199193,
+    "wallClockMs": 203947
+  },
+  {
+    "task": "account-and-contact",
+    "ok": true,
+    "structured": {
+      "areaExplored": "Account settings page (http://localhost:4173/account.html) and Contact page (http://localhost:4173/contact.html), including all form interactions on both pages, label/accessibility checks, network activity inspection, and FAQ content review.",
+      "actionsPerformed": [
+        "Navigated to http://localhost:4173 (Home page)",
+        "Captured console errors on Home page",
+        "Navigated to http://localhost:4173/account.html",
+        "Took accessibility snapshot of Account page",
+        "Clicked the Account page logo image (to test link behavior)",
+        "Clicked 'Save changes' with valid data (Dana Whitfield / dana@widgetworks.example)",
+        "Cleared Name field and clicked 'Save changes' with empty name",
+        "Filled Name=Dana Whitfield, Email=notanemail and clicked 'Save changes'",
+        "Restored valid email and clicked 'Save changes' again",
+        "Evaluated DOM to check label-for associations on Account inputs",
+        "Evaluated DOM to check checkbox label markup",
+        "Navigated to http://localhost:4173/contact.html",
+        "Took accessibility snapshot of Contact page",
+        "Evaluated DOM to check label-for associations on Contact form inputs",
+        "Clicked 'Send message' with all fields empty",
+        "Captured console errors after empty contact form submission",
+        "Filled Name=Sam Tester, Email=sam@example.com, Message=Hello... and clicked 'Send message'",
+        "Checked network requests filtered to /api/ after contact form submissions"
+      ],
+      "toolReliabilityNotes": "Overall the browser tools worked reliably. One minor issue: `browser_triple_click` does not exist as a tool — I had to use `browser_evaluate` to clear a field, then `browser_type` with empty string instead. The network request log is scoped to the current page session, so account-page API calls were no longer visible after navigating to the contact page — this limited retroactive inspection of account save behavior. No retries were needed for navigation; pages loaded on first attempt.",
+      "findings": [
+        {
+          "observation": "Logo on the Account page is not a clickable link. Clicking it does nothing and the URL stays at /account.html. On the Home page and Contact page the logo is wrapped in an anchor element pointing to /index.html. The Account page renders the logo as a bare img with no parent anchor.",
+          "heuristics": [
+            "Familiarity",
+            "Comparable Products"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Account page snapshot shows `img \"WidgetWorks\" [ref=f1e4]` with no parent link element. Home page snapshot shows `link [ref=e4] -> img \"WidgetWorks\"`. Clicking the Account logo left the URL at /account.html."
+        },
+        {
+          "observation": "Saving the Account form with valid data (name and email populated) produces no visible feedback whatsoever — no success toast, no status banner, no inline confirmation, no change to the 'Last updated' paragraph. The user cannot tell whether the save succeeded or failed.",
+          "heuristics": [
+            "Explainability",
+            "User Expectations"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "After clicking 'Save changes' with Name='Dana Whitfield' and Email='dana@widgetworks.example', the snapshot was identical to before the click. The 'Last updated: 11/2/2025' paragraph did not change. No new UI elements appeared."
+        },
+        {
+          "observation": "Submitting the Account form with the Name field empty (or with an invalid email address) displays a raw JavaScript implementation error to the user: 'Error: Cannot read properties of null (reading \\'field\\')'. This is an internal runtime exception, not a user-friendly validation message.",
+          "heuristics": [
+            "Explainability",
+            "User Expectations",
+            "Statutes/Standards"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "After clearing Name and clicking 'Save changes', a `generic [ref=f1e36]` element appeared in the main content with the text: \"Error: Cannot read properties of null (reading 'field')\". Same error appeared with Name='Dana Whitfield' but Email='notanemail'."
+        },
+        {
+          "observation": "'Last updated' timestamp on the Account page shows 11/2/2025 and does not update after a successful save operation. If the save is working, the timestamp is not refreshing; if the save is not working, the static timestamp is misleading about data state.",
+          "heuristics": [
+            "History",
+            "Explainability"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "The paragraph `Last updated: 11/2/2025` was identical in every snapshot taken during the session regardless of save operations performed."
+        },
+        {
+          "observation": "The 'Email me order updates' checkbox has no associated <label> element. The visible text 'Email me order updates' is a bare text node adjacent to the input, meaning clicking the text does not toggle the checkbox — a standard user expectation and WCAG requirement.",
+          "heuristics": [
+            "Statutes/Standards",
+            "User Expectations",
+            "Familiarity"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "DOM evaluation returned `labelFor: null` for the checkbox with id='notifications'. The parent element's innerHTML was: `<input type=\"checkbox\" id=\"notifications\"> Email me order updates` — the text is a raw text node, not a <label> element."
+        },
+        {
+          "observation": "Footer copyright year reads '© 2019 WidgetWorks' on both the Account page and the Contact page, while the Home page footer shows '© 2026 WidgetWorks'. The year is both stale and inconsistent across pages.",
+          "heuristics": [
+            "History",
+            "Image",
+            "Claims"
+          ],
+          "severity": "low",
+          "confidence": "high",
+          "evidenceNote": "Account page snapshot: `paragraph [ref=f1e35]: © 2019 WidgetWorks`. Contact page snapshot: `paragraph [ref=f2e48]: © 2019 WidgetWorks`. Home page snapshot: `paragraph [ref=e52]: © 2026 WidgetWorks`."
+        },
+        {
+          "observation": "The Contact form accepts submission with all fields completely empty. No required-field validation fires on the client side. Submitting a blank Name, blank Email, and blank Message shows a success confirmation rather than validation errors.",
+          "heuristics": [
+            "CRUD-Create",
+            "User Expectations",
+            "Statutes/Standards",
+            "Claims"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Clicked 'Send message' with all three textboxes empty. The snapshot immediately showed `generic [ref=f2e49]: Message sent! We will be in touch shortly.` with no error messages and all fields still empty."
+        },
+        {
+          "observation": "The Contact form's /api/contact endpoint returns HTTP 404 Not Found on every submission, meaning no message is ever actually delivered. Despite this, the client-side code ignores the server error and always displays 'Message sent! We will be in touch shortly.' — a false positive confirmation that misleads the user into believing their message was received.",
+          "heuristics": [
+            "Claims",
+            "Explainability",
+            "CRUD-Create"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Network requests log shows: `[POST] http://localhost:4173/api/contact => [404] Not Found` twice (once for empty submission, once for Sam Tester / sam@example.com / real message body). Console showed `Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4173/api/contact`. Both submissions displayed the 'Message sent!' banner."
+        },
+        {
+          "observation": "The Contact page headline states 'Support response within 1 hour, 24/7.' This claim is factually violated: the contact API is broken (404), so no submitted message ever reaches the team, making any response timeline impossible. Even if the API were functional, the claim would be unverifiable from the UI.",
+          "heuristics": [
+            "Claims",
+            "World"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "The page subtitle `paragraph [ref=f2e21]: Support response within 1 hour, 24/7.` is visible on every contact page load. Both actual form submissions failed at the network layer with 404, confirming no message reaches anyone to respond to."
+        }
+      ]
+    },
+    "rawResultText": null,
+    "costUsd": 0.5505354,
+    "numTurns": 36,
+    "durationMs": 274379,
+    "wallClockMs": 279285
+  },
+  {
+    "task": "delete-widget",
+    "ok": true,
+    "structured": {
+      "areaExplored": "Edit/Delete flow for catalog item w-001 (\"Anodized Standoff Set\"), with incidental observations on catalog and item detail pages encountered during navigation.",
+      "actionsPerformed": [
+        "navigated to http://localhost:4173/",
+        "took accessibility snapshot of Home page",
+        "clicked Catalog nav link",
+        "took snapshot of Catalog page (noted copyright year and price formatting)",
+        "clicked item card for w-001 (Anodized Standoff Set)",
+        "took snapshot of item detail page",
+        "clicked 'Edit this widget' link",
+        "took snapshot of edit-item page and read all text including deletion section",
+        "clicked 'Delete widget' button",
+        "read browser confirm dialog text exactly: 'This item will be archived and can be restored within 30 days. Continue?'",
+        "accepted the confirm dialog",
+        "took snapshot of catalog page after redirect",
+        "searched snapshot for 'w-001' — item still present",
+        "navigated fresh to http://localhost:4173/catalog.html — item still present",
+        "navigated to http://localhost:4173/item.html?id=w-001 to check post-delete detail page",
+        "took snapshot — page rendered with undefined values",
+        "captured console errors"
+      ],
+      "toolReliabilityNotes": "The first browser_navigate call returned a tool-not-found error, then immediately succeeded on a second attempt — consistent with the documented initialization delay. All subsequent tool calls worked without issue. The confirm dialog was surfaced correctly in the tool result and handled cleanly via browser_handle_dialog.",
+      "findings": [
+        {
+          "observation": "After confirming deletion, the catalog still lists w-001 ('Anodized Standoff Set') even after a fresh full-page navigation to catalog.html. The server-side API confirms the record is gone (GET /api/widgets/w-001 returns HTTP 404), so the catalog list is not refreshed to reflect the deletion.",
+          "heuristics": [
+            "CRUD-Delete",
+            "CRUD-Read",
+            "User Expectations"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Snapshot after deletion redirect shows w-001 card at /item.html?id=w-001 still in catalog. A second full navigate to catalog.html also shows it. Console error confirms: 'Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4173/api/widgets/w-001' — confirming backend deleted the record but the catalog view is stale."
+        },
+        {
+          "observation": "The deletion confirmation text — both on the edit page and in the browser dialog — says 'This item will be archived and can be restored within 30 days.' The actual server behavior is a hard delete: the API returns 404 Not Found with no indication of an archive. No restore mechanism exists anywhere in the UI.",
+          "heuristics": [
+            "Claims",
+            "CRUD-Delete",
+            "User Expectations"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Edit page paragraph text (ref f3e42): 'This item will be archived and can be restored within 30 days.' Confirm dialog: 'This item will be archived and can be restored within 30 days. Continue?' After deletion, GET /api/widgets/w-001 → HTTP 404 Not Found. No archive section, restore button, or archived-items view exists anywhere in the app. The claim of reversibility is false."
+        },
+        {
+          "observation": "Navigating to item.html?id=w-001 after deletion renders a broken page: the heading is empty, the date reads 'Added on undefined', the price and description paragraphs are blank, the image alt is 'undefined', and the 'Edit this widget' link points to '#' instead of a real URL. A raw JavaScript TypeError is thrown but not surfaced to the user — they see a silent broken page with no explanation.",
+          "heuristics": [
+            "Explainability",
+            "CRUD-Read",
+            "Image"
+          ],
+          "severity": "high",
+          "confidence": "high",
+          "evidenceNote": "Snapshot of item.html?id=w-001 post-deletion: heading [level=1] is empty, 'Added on undefined', img alt='undefined', 'Edit this widget' href='#'. Console: 'TypeError: Cannot read properties of undefined (reading 'toFixed') at http://localhost:4173/js/item.js:10:69' and 'Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:4173/undefined'. No 'item not found' message is shown."
+        },
+        {
+          "observation": "After the user confirms deletion and is redirected to the catalog, there is no success message, toast, or banner confirming that the deletion occurred. The user cannot tell from the UI whether the action succeeded — especially since the deleted item is still visible in the list.",
+          "heuristics": [
+            "Explainability",
+            "User Expectations"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Snapshot of catalog.html immediately after redirect from delete action shows no notification or status message of any kind. The item w-001 remains visible in the list, making the outcome completely ambiguous to the user."
+        },
+        {
+          "observation": "The footer copyright year is inconsistent across pages: the Home page shows '© 2026 WidgetWorks' while Catalog, Item detail, and Edit item pages all show '© 2019 WidgetWorks'.",
+          "heuristics": [
+            "History",
+            "Image",
+            "Comparable Products"
+          ],
+          "severity": "low",
+          "confidence": "high",
+          "evidenceNote": "Home page snapshot (ref e52): '© 2026 WidgetWorks'. Catalog page snapshot (ref f1e74): '© 2019 WidgetWorks'. Item detail (ref f2e33): '© 2019 WidgetWorks'. Edit item (ref f3e46): '© 2019 WidgetWorks'. The discrepancy is seven years."
+        },
+        {
+          "observation": "Prices in the catalog are displayed with three decimal places (e.g., '$19.990', '$14.200', '$6.200', '$42.000') rather than the standard two decimal places for USD currency.",
+          "heuristics": [
+            "World",
+            "Image"
+          ],
+          "severity": "medium",
+          "confidence": "high",
+          "evidenceNote": "Catalog snapshot shows: '$19.990' (w-001), '$14.200' (w-009), '$6.200' (w-021), '$10.400' (w-022), '$5.500' (w-017), '$4.100' (w-006), '$42.000' (w-024), '$16.800' (w-013). All prices have three decimal places. Same pattern on the item detail page: '$19.990'. Standard USD formatting is two decimal places."
+        }
+      ]
+    },
+    "rawResultText": "## Session Summary\n\nSix concrete findings from this delete-flow session:\n\n---\n\n### F-01 · HIGH · CRUD-Delete / CRUD-Read / User Expectations\n**Deleted item remains in catalog after deletion.**\nThe backend successfully deletes the record (`GET /api/widgets/w-001 → 404`), but the catalog list is never refreshed to reflect this. Even after a full fresh navigation to `catalog.html`, w-001 still appears as a browsable item.\n\n---\n\n### F-02 · HIGH · Claims / CRUD-Delete / User Expectations\n**\"Archived, recoverable within 30 days\" claim is false — delete is permanent and irreversible.**\nBoth the edit page and the confirm dialog explicitly state: *\"This item will be archived and can be restored within 30 days.\"* The actual server behavior is a hard delete (HTTP 404). No archive view, restore button, or recovery mechanism exists anywhere in the application.\n\n---\n\n### F-03 · HIGH · Explainability / CRUD-Read / Image\n**Item detail page renders broken with `undefined` values when item is deleted — no \"not found\" state.**\nNavigating to `item.html?id=w-001` post-deletion shows: empty heading, \"Added on undefined\", blank price and description, `alt=\"undefined\"` on the image, and the edit link pointing to `#`. A `TypeError: Cannot read properties of undefined (reading 'toFixed')` is thrown silently. The user receives no explanation.\n\n---\n\n### F-04 · MEDIUM · Explainability / User Expectations\n**No success feedback after deletion — outcome is completely ambiguous.**\nAfter confirming deletion the app silently redirects to `catalog.html` with no toast, banner, or status message. Because the deleted item is still visible in the list, there is no way for the user to know whether the action succeeded.\n\n---\n\n### F-05 · LOW · History / Image\n**Copyright year is inconsistent: Home shows © 2026, all other pages show © 2019.**\nThe seven-year discrepancy across pages suggests the footer is hardcoded differently in each page template and has not been kept in sync.\n\n---\n\n### F-06 · MEDIUM · World / Image\n**Prices display with three decimal places throughout (e.g., `$19.990`, `$42.000`) — non-standard for USD.**\nEvery price in the catalog and on item detail pages shows three decimal places. Standard USD formatting is two. This appears to be a `toFixed(3)` call where `toFixed(2)` was intended.",
+    "costUsd": 0.33171360000000005,
+    "numTurns": 19,
+    "durationMs": 159428,
+    "wallClockMs": 164631
+  }
+]

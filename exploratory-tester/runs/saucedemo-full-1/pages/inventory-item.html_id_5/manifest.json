@@ -1,0 +1,41 @@
+{
+  "url": "https://www.saucedemo.com/inventory-item.html?id=5",
+  "slug": "inventory-item.html_id_5",
+  "reachedVia": "client-side-navigation",
+  "otherUrlsSharingThisTemplate": [
+    "https://www.saucedemo.com/inventory-item.html?id=1",
+    "https://www.saucedemo.com/inventory-item.html?id=2",
+    "https://www.saucedemo.com/inventory-item.html?id=6",
+    "https://www.saucedemo.com/inventory-item.html?id=3",
+    "https://www.saucedemo.com/inventory-item.html?id=4"
+  ],
+  "title": "Swag Labs",
+  "navError": null,
+  "headings": [],
+  "badgeLikeText": [],
+  "footerText": "TwitterFacebookLinkedIn© 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/inventory-item.html_id_5/screenshot-full.png",
+    "domSnapshot": "pages/inventory-item.html_id_5/dom-snapshot.html",
+    "textContent": "pages/inventory-item.html_id_5/text-content.txt"
+  }
+}

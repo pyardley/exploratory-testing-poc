@@ -1,0 +1,100 @@
+{
+  "overallSummary": "Session covered three pages of the Swag Labs demo app (inventory/catalog, cart, and one item detail) using fixed evidence captured by deterministic tooling. The most striking finding is the sheer density of global-component defects: the wordmark, the nav sidebar's About link, the cart icon anchor, and the page title are all broken or inaccessible on every page reviewed, meaning a handful of shared template bugs multiply across the entire application. On top of that, the catalog's primary interactive feature — the sort control — is completely non-functional, and every product image resolves to the same 404-placeholder asset (`/assets/sl-404-Cq1a9k9X.jpg`), making visual product differentiation impossible. The cart page adds a secondary critical issue: Checkout is fully enabled with zero items. Accessibility is structurally weak across all three pages, with no semantic heading elements on any page and a globally unlabeled cart link. In total the session surfaced five high-severity findings, six medium, and three low — several of which are systemic rather than page-specific.",
+  "crossPageFindings": [
+    {
+      "observation": "The hamburger sidebar navigation 'About' link has `href='https://saucelabs.com/error/404'` in the DOM of every page reviewed (confirmed verbatim in inventory.html and cart.html DOM snapshots; also confirmed in the item-detail per-page finding). Clicking 'About' from anywhere in the app deliberately navigates the user to an external third-party 404 error page. Because this is a shared navigation component, it affects every page simultaneously — not one isolated page.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/cart.html",
+        "https://www.saucedemo.com/inventory-item.html?id=5"
+      ],
+      "heuristics": [
+        "Purpose",
+        "Claims",
+        "Familiarity"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The 'Swag Labs' wordmark is `<div class=\"app_logo\">Swag Labs</div>` with no anchor wrapper on every page reviewed (confirmed in both inventory.html and cart.html DOM snapshots; per-page item-detail finding also confirms it). Clicking the logo is a dead interaction on every page. Web convention — and the Familiarity heuristic — demands the wordmark navigate home; here it does nothing, and it does so consistently across the entire application.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/cart.html",
+        "https://www.saucedemo.com/inventory-item.html?id=5"
+      ],
+      "heuristics": [
+        "Familiarity",
+        "Comparable Products"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "The shopping cart header icon is `<a class=\"shopping_cart_link\"></a>` — an anchor with no text content, no aria-label, and no aria-labelledby — confirmed in both inventory.html and cart.html DOM snapshots. Screen readers will announce it as an unlabeled link on every page. This is a global component defect, not a per-page oversight.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/cart.html"
+      ],
+      "heuristics": [
+        "Statutes/Standards"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "`<title>Swag Labs</title>` is the literal same string on all three pages (confirmed in inventory.html, cart.html DOM snapshots and in the item-detail per-page finding). There is no page-specific qualifier anywhere. A user with the catalog, a product detail, and the cart all open in separate tabs cannot distinguish them by title, and browser history/bookmarks are equally opaque. This is a systemic template-level omission.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/cart.html",
+        "https://www.saucedemo.com/inventory-item.html?id=5"
+      ],
+      "heuristics": [
+        "Familiarity",
+        "User Expectations"
+      ],
+      "severity": "low",
+      "confidence": "high"
+    },
+    {
+      "observation": "Page-level content headings are implemented as `<span class=\"title\">` elements — never as semantic `<h1>`–`<h6>` — on every page reviewed: `<span class=\"title\">Products</span>` on inventory.html, `<span class=\"title\">Your Cart</span>` on cart.html, and the item name as a styled `<div>` on the detail page (all confirmed in DOM snapshots and per-page findings, all manifests report `headings: []`). This is a systemic structural pattern, not an isolated mistake. Screen-reader users have no heading landmarks to navigate by on any page in the app.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/cart.html",
+        "https://www.saucedemo.com/inventory-item.html?id=5"
+      ],
+      "heuristics": [
+        "Statutes/Standards",
+        "Familiarity"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "All six product cards in the catalog use the same image src (`/assets/sl-404-Cq1a9k9X.jpg` — the '404' in the filename strongly suggests a 404-fallback asset), yet the item detail per-page finding describes 'a product image with meaningful alt text' as though the image rendered correctly there. If the detail page resolves a correct per-product image while the catalog falls back to a broken placeholder for all items, then list and detail pages are visually inconsistent for the same records — a user who clicks into a detail expecting a product photo matching what they saw in the catalog will see something different. The evidence bundle does not include the item-detail DOM to confirm the detail-page image src, so this remains a medium-confidence cross-page suspicion rather than a confirmed defect.",
+      "pagesInvolved": [
+        "https://www.saucedemo.com/inventory.html",
+        "https://www.saucedemo.com/inventory-item.html?id=5"
+      ],
+      "heuristics": [
+        "CRUD-Read",
+        "Image",
+        "User Expectations"
+      ],
+      "severity": "medium",
+      "confidence": "medium"
+    }
+  ],
+  "prioritizedIssues": [
+    "CRITICAL — Sort control completely non-functional (inventory): All four sort options produce identical output; the catalog's only interactive feature delivers nothing, silently, with no error feedback. (Purpose, User Expectations, Claims — high confidence)",
+    "CRITICAL — Global 'About' nav link hard-coded to `https://saucelabs.com/error/404`: Confirmed in every page's DOM. Any user opening the sidebar and clicking About is deliberately navigated to an external 404. Core navigation is broken app-wide. (Purpose, Claims — cross-page, high confidence)",
+    "HIGH — All catalog product images resolve to the same 404-named placeholder asset: Six different products display the same image, making visual differentiation impossible and the catalog's browse-to-buy purpose undeliverable. (Image, World, Purpose — high confidence)",
+    "HIGH — Checkout button enabled on empty cart: No guard, no disabled state, no feedback. A user with an empty cart can proceed into the checkout flow, producing a broken or cryptic experience downstream. (User Expectations, Purpose — high confidence)",
+    "HIGH — Sort `<select>` has no accessible name (WCAG 4.1.2, Level A critical): The only interactive control on the catalog page is completely opaque to screen-reader users. (Statutes/Standards — high confidence)",
+    "MEDIUM — Non-interactive wordmark on every page: `<div class=\"app_logo\">` has no anchor; clicking the Swag Labs logo does nothing, violating a near-universal web convention on every page. (Familiarity, Comparable Products — cross-page, high confidence)",
+    "MEDIUM — No semantic heading elements anywhere in the application: Every page uses `<span class=\"title\">` or styled `<div>` instead of `<h1>`–`<h6>`, leaving screen-reader users with no heading landmarks on any page. Systemic structural defect. (Statutes/Standards — cross-page, high confidence)",
+    "MEDIUM — Cart icon anchor has no accessible name on any page: `<a class=\"shopping_cart_link\"></a>` with no text or aria-label is present in the global header, failing WCAG 4.1.2 on every page. (Statutes/Standards — cross-page, high confidence)",
+    "MEDIUM — No empty-state message on empty cart: Blank gap between column headers and action buttons with no explanation or call-to-action, making the page look broken. (User Expectations, Explainability, Comparable Products)",
+    "LOW — Generic `<title>Swag Labs</title>` on every page: No page-specific qualifier on any of the three pages reviewed; tabs, bookmarks, and browser history cannot distinguish pages. Systemic template omission. (Familiarity, User Expectations — cross-page, high confidence)"
+  ]
+}

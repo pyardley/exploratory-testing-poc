@@ -1,0 +1,26 @@
+{
+  "steps": [
+    {
+      "step": "create",
+      "skipped": true,
+      "reason": "no create-like form found among crawled pages"
+    },
+    {
+      "step": "update",
+      "skipped": true,
+      "reason": "could not find any item detail links from the list page"
+    },
+    {
+      "step": "read-beyond-page-1",
+      "attempted": false,
+      "reached": false,
+      "reason": "no Next-like control found"
+    },
+    {
+      "step": "delete",
+      "skipped": true,
+      "reason": "could not find a second item to test deletion on"
+    }
+  ],
+  "dialogMessages": []
+}

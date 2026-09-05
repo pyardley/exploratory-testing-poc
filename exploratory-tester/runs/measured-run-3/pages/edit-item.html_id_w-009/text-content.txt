@@ -1,0 +1,20 @@
+Home
+Catalog
+Account
+Contact
+About
+Edit widget
+Name
+Category
+Description
+Price (USD)
+Weight (kg)
+Save changes
+Cancel
+Remove this widget
+
+This item will be archived and can be restored within 30 days.
+
+Delete widget
+
+© 2019 WidgetWorks

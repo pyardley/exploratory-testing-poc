@@ -1,0 +1,14 @@
+{
+  "directionalControls": [],
+  "searchProbes": [],
+  "paginationProbes": [],
+  "checkboxRoundTrip": [
+    {
+      "checkboxId": "notifications",
+      "before": true,
+      "toggledTo": false,
+      "afterReload": true,
+      "persistedCorrectly": false
+    }
+  ]
+}

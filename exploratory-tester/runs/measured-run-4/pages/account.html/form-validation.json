@@ -1,0 +1,16 @@
+{
+  "forms": [
+    {
+      "formId": "accountForm",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": true,
+      "errorIndicatorShown": true,
+      "errorTextOnEmptySubmit": "Error: Cannot read properties of null (reading 'field')",
+      "numericFieldProbed": null,
+      "errorTextOnInvalidType": null,
+      "networkRequestFiredOnInvalidType": null,
+      "sameErrorTextAcrossScenarios": null
+    }
+  ],
+  "cancelButtonProbes": []
+}

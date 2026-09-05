@@ -1,0 +1,52 @@
+{
+  "url": "http://localhost:4173/account.html",
+  "slug": "account.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Account — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Account"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [
+    {
+      "type": "logo-not-linked",
+      "heuristics": [
+        "Familiarity"
+      ],
+      "description": "Header logo is not wrapped in a link, unlike the golden reference page."
+    },
+    {
+      "type": "webfont-not-imported",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "This page does not import the brand typeface (Inter) via the Google Fonts link the golden reference page uses — text is likely rendering in a fallback system font instead."
+    }
+  ],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [
+      {
+        "formId": "accountForm",
+        "submittedEmpty": true,
+        "networkRequestFiredOnEmptySubmit": true,
+        "errorIndicatorShown": true
+      }
+    ],
+    "cancelButtonProbes": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/account.html/screenshot-full.png",
+    "domSnapshot": "pages/account.html/dom-snapshot.html",
+    "textContent": "pages/account.html/text-content.txt"
+  }
+}

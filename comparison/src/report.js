@@ -3,7 +3,7 @@ function pct(n, d) {
   return `${((n / d) * 100).toFixed(0)}%`;
 }
 
-export function buildReport({ faultCatalog, adjudication, runInfo }) {
+export function buildReport({ faultCatalog, adjudication, runInfo, multiRun }) {
   const verdicts = adjudication.verdicts || [];
   const byId = new Map(verdicts.map((v) => [v.faultId, v]));
 
@@ -23,6 +23,15 @@ export function buildReport({ faultCatalog, adjudication, runInfo }) {
 
   let md = `# Exploratory Tester Effectiveness — Comparison Report\n\n`;
   md += `**Target run:** ${runInfo.runId}  \n**Base URL:** ${runInfo.baseUrl}  \n**Generated:** ${new Date().toISOString()}\n\n`;
+
+  if (multiRun) {
+    md += `## Multi-Run Reliability\n\n`;
+    md += `This scorecard aggregates **${multiRun.runs} independent adjudication runs** over the same tester output, rather than trusting a single LLM call — see README.md Recommendations #5. Each fault's verdict below is the mean-score aggregate across runs; per-fault agreement (how often the runs agreed with the aggregate verdict) is shown in Fault-by-Fault Detail.\n\n`;
+    md += `| Recall across runs | Value |\n|---|---|\n`;
+    md += `| Minimum | ${pct(multiRun.recallRange.min, 1)} |\n`;
+    md += `| Maximum | ${pct(multiRun.recallRange.max, 1)} |\n`;
+    md += `| Mean | ${pct(multiRun.recallRange.mean, 1)} |\n\n`;
+  }
 
   md += `## Scorecard\n\n`;
   md += `| Metric | Count | % of ${total} faults |\n|---|---|---|\n`;
@@ -52,6 +61,7 @@ export function buildReport({ faultCatalog, adjudication, runInfo }) {
     md += `- **Verdict:** ${v?.verdict || "NOT ADJUDICATED"}\n`;
     if (v?.matchingFinding) md += `- **Matching finding:** ${v.matchingFinding}\n`;
     if (v?.detectionSource && v.detectionSource !== "n/a") md += `- **Detected via:** ${v.detectionSource}\n`;
+    if (v?.distribution) md += `- **Run agreement:** ${pct(v.agreement, 1)} (votes: ${JSON.stringify(v.distribution)})\n`;
     md += `- **Reasoning:** ${v?.reasoning || "n/a"}\n\n`;
   }
 

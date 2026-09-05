@@ -6,7 +6,8 @@
   "workspaces": [
     "test-app",
     "exploratory-tester",
-    "comparison"
+    "comparison",
+    "regression"
   ],
   "scripts": {
     "app:install": "npm install --workspace test-app",
@@ -16,6 +17,8 @@
     "tester:run": "npm run run --workspace exploratory-tester",
     "compare:install": "npm install --workspace comparison",
     "compare:run": "npm run run --workspace comparison",
+    "regression:install": "npm install --workspace regression",
+    "regression:test": "npm test --workspace regression",
     "demo": "node scripts/run-full-demo.js"
   },
   "engines": {

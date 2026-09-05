@@ -1,0 +1,38 @@
+{
+  "url": "http://localhost:4173/item.html?id=w-009",
+  "slug": "item.html_id_w-009",
+  "otherUrlsSharingThisTemplate": [
+    "http://localhost:4173/item.html?id=w-021",
+    "http://localhost:4173/item.html?id=w-001",
+    "http://localhost:4173/item.html?id=w-022",
+    "http://localhost:4173/item.html?id=w-017",
+    "http://localhost:4173/item.html?id=w-006",
+    "http://localhost:4173/item.html?id=w-024",
+    "http://localhost:4173/item.html?id=w-013"
+  ],
+  "title": "Item — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Anodized Standoff Set"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 0,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/item.html_id_w-009/screenshot-full.png",
+    "domSnapshot": "pages/item.html_id_w-009/dom-snapshot.html",
+    "textContent": "pages/item.html_id_w-009/text-content.txt"
+  }
+}

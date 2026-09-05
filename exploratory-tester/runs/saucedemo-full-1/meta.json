@@ -1,0 +1,9 @@
+{
+  "runId": "saucedemo-full-1",
+  "baseUrl": "https://www.saucedemo.com",
+  "goldenUrl": "https://www.saucedemo.com/inventory.html",
+  "checklistPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\checklist\\few-hiccupss-crud-checklist.md",
+  "charterPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\charter\\exploratory-charter.md",
+  "appDescPath": "C:\\Users\\PaulYardley\\Projects\\ExporitoryTesting\\app-spec\\test-app-description.md",
+  "startedAt": "2026-09-05T12:07:01.036Z"
+}

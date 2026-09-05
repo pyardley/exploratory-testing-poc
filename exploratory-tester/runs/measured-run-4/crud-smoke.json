@@ -1,0 +1,77 @@
+{
+  "steps": [
+    {
+      "step": "create",
+      "formUrl": "http://localhost:4173/new-item.html",
+      "tagValue": "AAA-PROBE-1788540316172",
+      "navigatedTo": "http://localhost:4173/catalog.html"
+    },
+    {
+      "step": "read-after-create",
+      "listUrl": "http://localhost:4173/catalog.html",
+      "foundOnListPage": false
+    },
+    {
+      "step": "update-0",
+      "itemUrl": "http://localhost:4173/item.html?id=w-001",
+      "editUrl": "http://localhost:4173/edit-item.html?id=w-001",
+      "originalName": null,
+      "updatedTag": "AAA-PROBE-1788540316172-UPDATED-0",
+      "intendedItemReflectsUpdate": true,
+      "otherRecordsThatChangedUnexpectedly": []
+    },
+    {
+      "step": "update-1",
+      "itemUrl": "http://localhost:4173/item.html?id=w-009",
+      "editUrl": "http://localhost:4173/edit-item.html?id=w-009",
+      "originalName": "Anodized Standoff Set",
+      "updatedTag": "AAA-PROBE-1788540316172-UPDATED-1",
+      "intendedItemReflectsUpdate": false,
+      "otherRecordsThatChangedUnexpectedly": [
+        {
+          "href": "/item.html?id=w-002",
+          "beforeText": "(not visible in this view before the edit)",
+          "afterText": "AAA-PROBE-1788540316172-UPDATED-1\n        Exploratory tester probe value\n        $9.990"
+        }
+      ]
+    },
+    {
+      "step": "update-2",
+      "itemUrl": "http://localhost:4173/item.html?id=w-021",
+      "editUrl": "http://localhost:4173/edit-item.html?id=w-021",
+      "originalName": "Anti-Vibration Washer Set",
+      "updatedTag": "AAA-PROBE-1788540316172-UPDATED-2",
+      "intendedItemReflectsUpdate": false,
+      "otherRecordsThatChangedUnexpectedly": [
+        {
+          "href": "/item.html?id=w-004",
+          "beforeText": "(not visible in this view before the edit)",
+          "afterText": "AAA-PROBE-1788540316172-UPDATED-2\n        Exploratory tester probe value\n        $9.990"
+        }
+      ]
+    },
+    {
+      "step": "update-double-submit-race",
+      "editUrl": "http://localhost:4173/edit-item.html?id=w-021",
+      "saveButtonDisabledAfterFirstClick": false,
+      "mutatingRequestsFiredFromTwoRapidClicks": 2
+    },
+    {
+      "step": "read-beyond-page-1",
+      "attempted": true,
+      "reached": false,
+      "page2ItemUrl": null
+    },
+    {
+      "step": "delete",
+      "deleteEditUrl": "http://localhost:4173/edit-item.html?id=w-001",
+      "deletedItemName": "AAA-PROBE-1788540316172-UPDATED-0",
+      "confirmDialogMessage": "This item will be archived and can be restored within 30 days. Continue?",
+      "stillVisibleInSameSessionAfterDelete": true,
+      "stillVisibleInFreshSessionAfterDelete": false
+    }
+  ],
+  "dialogMessages": [
+    "This item will be archived and can be restored within 30 days. Continue?"
+  ]
+}

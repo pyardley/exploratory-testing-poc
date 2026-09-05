@@ -1,0 +1,166 @@
+{
+  "overallSummary": "This session covered all eight in-scope WidgetWorks pages and surfaced a product with a clean visual shell hiding several serious functional and data-integrity defects. The most urgent cluster is on the edit path: the Cancel button on the Edit Item page appears wired to the save handler (it fires a network request), empty form submission silently reaches the server with no error shown, and the deletion UI promises a 30-day archive/restore that no other page in the product supports. A second cluster concerns false marketing claims: the About page says the company has served customers for \"over 15 years\" (founded 2018 = ~8 years), the About page counts \"500 customers\" while the Home page claims \"10,000+\", and the Home page claims 1,200+ catalog items against a catalog that shows roughly 24. The price formatting is inconsistently represented across three pages (3 decimals on catalog/detail, 1 decimal on edit pre-fill, 2 expected by convention). Infrastructure defects — stale 2019 copyright on every page except Home, missing Inter font on at least one page, logo not linked on Account — are systemic and suggest the Home page received fixes that were never propagated to the rest of the site.",
+  "crossPageFindings": [
+    {
+      "observation": "Customer count is stated as '10k+ Customers served' / 'over 10,000 happy customers' on the Home page, and as 'Proudly serving our first 500 customers since 2018' on the About page. These are direct, irreconcilable contradictions about the same fact on two pages that prospective customers are equally likely to read.",
+      "pagesInvolved": [
+        "Home (index.html)",
+        "About (about.html)"
+      ],
+      "heuristics": [
+        "Claims",
+        "History",
+        "World"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Home page hardcodes '1,200+ Parts in catalog' and '6 Categories' as marketing stats. The Catalog page shows 8 items on page 1 of 3, implying roughly 24 items in total — roughly 50× fewer than the claimed 1,200+. The actual category count visible in the catalog filter UI should also be verified against the '6 Categories' claim. A prospective customer who browses the catalog after reading the home page will immediately notice the discrepancy.",
+      "pagesInvolved": [
+        "Home (index.html)",
+        "Catalog (catalog.html)"
+      ],
+      "heuristics": [
+        "Claims",
+        "World",
+        "CRUD-Read"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The price for widget w-009 (Anodized Standoff Set) is rendered differently across three pages: '$14.200' (three decimal places) on the Catalog page and Item Detail page, and '14.2' (one decimal place) in the Edit Item pre-fill. The standard for USD is exactly two decimal places. All three representations are wrong by convention, and they differ from each other — suggesting the formatting bug lives in at least two separate code paths (list/detail rendering vs. form pre-population).",
+      "pagesInvolved": [
+        "Catalog (catalog.html)",
+        "Item Detail (item.html?id=w-009)",
+        "Edit Item (edit-item.html?id=w-009)"
+      ],
+      "heuristics": [
+        "World",
+        "CRUD-Read",
+        "CRUD-Update"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Edit Item page promises 'This item will be archived and can be restored within 30 days' when a widget is deleted. No other page in the entire navigation — Catalog, Account, Home, nor any other reachable page — presents any archive list or restore mechanism. The product makes a recovery promise it structurally cannot keep given the current UI surface.",
+      "pagesInvolved": [
+        "Edit Item (edit-item.html?id=w-009)",
+        "Catalog (catalog.html)",
+        "Home (index.html)"
+      ],
+      "heuristics": [
+        "Claims",
+        "CRUD-Delete",
+        "User Expectations"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The copyright year in the footer is correct and apparently dynamic on the Home page (renders as 2026), but is hardcoded as '© 2019 WidgetWorks' on every other page reviewed: Catalog, Account, Contact, About, New Item, Item Detail, and Edit Item. The fix was applied only to the reference page and not propagated to the shared template or any other page.",
+      "pagesInvolved": [
+        "Home (index.html)",
+        "Catalog (catalog.html)",
+        "Account (account.html)",
+        "Contact (contact.html)",
+        "About (about.html)",
+        "New Item (new-item.html)",
+        "Item Detail (item.html?id=w-009)",
+        "Edit Item (edit-item.html?id=w-009)"
+      ],
+      "heuristics": [
+        "History",
+        "Image"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "Catalog item thumbnails and Item Detail pages display product images, yet neither the New Item form nor the Edit Item form contains any image or photo upload field. There is no mechanism within the product to supply or change a widget's image at any point in the create/update lifecycle, making the image shown in browse views permanently unmanageable by the shop owner through the UI.",
+      "pagesInvolved": [
+        "Catalog (catalog.html)",
+        "Item Detail (item.html?id=w-009)",
+        "New Item (new-item.html)",
+        "Edit Item (edit-item.html?id=w-009)"
+      ],
+      "heuristics": [
+        "CRUD-Create",
+        "CRUD-Update",
+        "Purpose",
+        "Comparable Products"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Home page promotes 'Fast answers' with 'reach out any time' — a soft, informal promise. The Contact page escalates this to 'Support response within 1 hour, 24/7' — a specific, legally meaningful SLA. For a product operated by a single shop owner with no authentication or staffing infrastructure, the specific 1-hour claim is implausible and sets a user expectation that neither page's copy moderates. Taken together across pages, the two claims compound each other.",
+      "pagesInvolved": [
+        "Home (index.html)",
+        "Contact (contact.html)"
+      ],
+      "heuristics": [
+        "Claims",
+        "World",
+        "User Expectations"
+      ],
+      "severity": "medium",
+      "confidence": "medium"
+    },
+    {
+      "observation": "Three of four forms in the product (Contact, Account, Edit Item) fire a real network request when submitted empty, with no client-side validation guard, and in two cases (Contact, Edit Item) show no error indicator after the server returns a bad response. Only the New Item form correctly blocks empty submission client-side. This is a systematic form-handling failure pattern, not an isolated defect on a single page.",
+      "pagesInvolved": [
+        "Contact (contact.html)",
+        "Account (account.html)",
+        "Edit Item (edit-item.html?id=w-009)",
+        "New Item (new-item.html)"
+      ],
+      "heuristics": [
+        "User Expectations",
+        "Explainability",
+        "CRUD-Create",
+        "CRUD-Update",
+        "Statutes/Standards"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The logo is a clickable link to the Home page on the Home/reference page, but is a bare, unlinked <img> on the Account page. Evidence for other pages did not confirm their logo link state, but the Account deviation is confirmed. If the same template omission affects other non-Home pages, this is a site-wide navigation regression against a universal web convention.",
+      "pagesInvolved": [
+        "Home (index.html)",
+        "Account (account.html)"
+      ],
+      "heuristics": [
+        "Familiarity",
+        "Comparable Products"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    }
+  ],
+  "prioritizedIssues": [
+    "CRITICAL — Edit Item Cancel button fires a network request (cross-page: Edit Item): Cancel should never write data; the button appears wired to the save handler, meaning Dana clicking 'Cancel' to abandon edits may silently overwrite the record. This is the highest data-integrity risk in the session.",
+    "CRITICAL — Edit Item empty submit silently reaches the server with no error shown (cross-page form pattern: Contact, Account, Edit Item): three of four forms accept empty or invalid data server-side without client-side interception or post-response feedback, with only New Item correctly blocking submission. Silent writes of blank data can corrupt catalog records.",
+    "HIGH — Delete promises '30-day archive restore' but no restore UI exists anywhere in the product (cross-page: Edit Item vs all navigation pages): the claim is undeliverable given the current UI surface. Users who delete believing they can recover cannot.",
+    "HIGH — Contact form silent failure on empty submit (Contact page): the primary function of the Contact page — submitting a message — fails completely with no user feedback; the server returns a bad response and no error indicator is shown.",
+    "HIGH — Customer count contradiction: 10,000+ on Home vs 500 on About (cross-page): both are prominently placed marketing claims on pages a prospective customer is equally likely to read; the contradiction undermines trust in all factual claims site-wide.",
+    "HIGH — Homepage '1,200+ Parts in catalog' stat vs actual ~24 catalog items (cross-page: Home vs Catalog): the discrepancy is roughly 50×, making this an objectively false marketing claim visible to every visitor who browses the catalog.",
+    "HIGH — About page arithmetic error: 'Founded in 2018 … serving customers for over 15 years' (About page): 2026 − 2018 = ~8 years, not 15. A visitor who spots this will distrust every other fact on the page.",
+    "HIGH — Weight field unit contradiction on New Item: placeholder says 'e.g. 12 lbs', hint label says 'Weight (kg)' (New Item page): a user following the example enters pounds; the system expects kilograms. Every item created using the placeholder as a guide will have a silently incorrect weight.",
+    "HIGH — Price formatted inconsistently across three pages: 3 decimals on Catalog and Item Detail, 1 decimal on Edit Item pre-fill, 2 expected by USD convention (cross-page): suggests at least two separate formatting bugs and confuses both customers and the shop owner.",
+    "HIGH — WCAG AA color-contrast failure on Contact helper text (Contact page): contrast ratio 2.05:1 against a required 4.5:1; rated 'serious' by the accessibility scanner.",
+    "MEDIUM — No form labels on New Item (and Catalog search): all fields use placeholder text as label, which disappears on input and is not announced as a persistent label by screen readers; automated scanner missed this.",
+    "MEDIUM — Copyright year hardcoded as 2019 on every page except Home (cross-page: 7 pages): the Home page fix was not propagated to any shared template; seven-year-old copyright signals an unmaintained site to prospective customers.",
+    "MEDIUM — 'Edit this widget' is the primary (blue) CTA on Item Detail, not a browse or contact action (Item Detail page): the page hierarchy treats every anonymous visitor as an inventory manager, inverting the intended button prominence for Sam's browse context.",
+    "MEDIUM — Broken product image for Cable Tension Meter (Catalog page): src path uses '/img/widgets-missing/w-024.svg' instead of '/img/widgets/'; broken-image placeholder shown to prospective customers.",
+    "MEDIUM — Image upload absent from both New Item and Edit Item forms (cross-page: New Item, Edit Item, Catalog, Item Detail): photos are visible in browse views but completely unmanageable through the UI CRUD surface.",
+    "MEDIUM — '1-hour, 24/7 support' SLA on Contact page compounds the Home page's 'reach out any time' soft promise (cross-page): together they set an implausible expectation for a single-owner small business with no staffing infrastructure.",
+    "LOW — Logo not linked on Account page (cross-page: Home vs Account): violates the universal convention the Home page itself establishes; may affect other pages not confirmed in this evidence set.",
+    "LOW — Missing Inter font import on Account page causes visual drift from brand reference (Account page): body text renders in system font instead of the product's declared typeface.",
+    "LOW — 'Support response within 1 hour, 24/7' claim is unsubstantiated for a small-business single-owner product (Contact page): likely a false expectation-setting claim if not backed by actual staffing or tooling.",
+    "LOW — ISO date '2018-06-01' displayed raw in About page 'Since' badge instead of a human-readable format (About page): exposes implementation-level date representation to end users."
+  ]
+}

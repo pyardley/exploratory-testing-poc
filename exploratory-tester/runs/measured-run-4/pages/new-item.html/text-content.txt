@@ -1,0 +1,11 @@
+Home
+Catalog
+Account
+Contact
+About
+Add a widget
+Weight (kg)
+Save widget
+Cancel
+
+© 2019 WidgetWorks

@@ -1,0 +1,35 @@
+{
+  "steps": [
+    {
+      "step": "create",
+      "formUrl": "http://localhost:4173/new-item.html",
+      "tagValue": "ZZZ-PROBE-1788533764132",
+      "navigatedTo": "http://localhost:4173/catalog.html"
+    },
+    {
+      "step": "read-after-create",
+      "listUrl": "http://localhost:4173/catalog.html",
+      "foundOnListPage": false
+    },
+    {
+      "step": "update",
+      "editUrl": "http://localhost:4173/edit-item.html?id=w-001",
+      "originalName": null,
+      "updatedTag": "ZZZ-PROBE-1788533764132-UPDATED",
+      "updatedValueVisibleOnListAfterUpdate": false,
+      "snapshotChanged": true,
+      "note": "Compare updatedTag visibility and originalName persistence manually / via AI review — a generic diff can suggest but not prove which specific record changed."
+    },
+    {
+      "step": "delete",
+      "deleteEditUrl": "http://localhost:4173/edit-item.html?id=w-001",
+      "deletedItemName": "ZZZ-PROBE-1788533764132-UPDATED",
+      "confirmDialogMessage": "This item will be archived and can be restored within 30 days. Continue?",
+      "stillVisibleInSameSessionAfterDelete": false,
+      "stillVisibleInFreshSessionAfterDelete": false
+    }
+  ],
+  "dialogMessages": [
+    "This item will be archived and can be restored within 30 days. Continue?"
+  ]
+}

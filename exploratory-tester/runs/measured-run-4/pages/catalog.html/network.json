@@ -1,0 +1,18 @@
+{
+  "failedRequests": [],
+  "badResponses": [
+    {
+      "url": "http://localhost:4173/img/widgets-missing/w-024.svg",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:4173/img/widgets-missing/w-024.svg",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:4173/img/widgets-missing/w-024.svg",
+      "status": 404
+    }
+  ],
+  "pageErrors": []
+}

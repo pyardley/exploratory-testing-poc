@@ -1,0 +1,23 @@
+{
+  "facts": {
+    "logo": {
+      "src": "/img/logo.svg",
+      "width": 160,
+      "height": 40,
+      "aspectRatio": 4,
+      "hasLinkWrapper": true
+    },
+    "primaryButton": {
+      "text": "Browse the catalog",
+      "backgroundColor": "rgb(59, 111, 160)",
+      "borderRadius": "6px",
+      "padding": "8px 24px"
+    },
+    "containerPadding": "24px",
+    "formFieldSpacing": null,
+    "bodyFontFamily": "Inter, system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "hasInterFontLink": true,
+    "hasFaviconLink": true
+  },
+  "deviationsFromGolden": []
+}

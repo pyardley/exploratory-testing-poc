@@ -1,0 +1,13 @@
+{
+  "runId": "saucedemo-full-1",
+  "baseUrl": "https://www.saucedemo.com",
+  "goldenUrl": "https://www.saucedemo.com/inventory.html",
+  "scannedAt": "2026-09-05T12:07:01.036Z",
+  "pagesScanned": 3,
+  "totalBrokenLinks": 0,
+  "totalBrokenAssets": 0,
+  "totalConsoleErrors": 3,
+  "totalAccessibilityViolations": 1,
+  "totalVisualDeviations": 0,
+  "crudSmokeRan": true
+}

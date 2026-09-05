@@ -1,0 +1,189 @@
+{
+  "pages": [
+    {
+      "url": "https://www.saucedemo.com/inventory.html",
+      "actualUrl": "https://www.saucedemo.com/inventory.html",
+      "status": 200,
+      "contentType": "text/html",
+      "reachedVia": "already-positioned",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": []
+    },
+    {
+      "url": "https://www.saucedemo.com/cart.html",
+      "actualUrl": "https://www.saucedemo.com/cart.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "[data-test=\"shopping-cart-link\"]"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=5",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=5",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_4_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=1",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=1",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_0_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=2",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=2",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_1_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=6",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=6",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_5_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=3",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=3",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_2_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=4",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=4",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_3_img_link"
+      ]
+    }
+  ],
+  "allVisited": [
+    {
+      "url": "https://www.saucedemo.com/inventory.html",
+      "actualUrl": "https://www.saucedemo.com/inventory.html",
+      "status": 200,
+      "contentType": "text/html",
+      "reachedVia": "already-positioned",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": []
+    },
+    {
+      "url": "https://www.saucedemo.com/cart.html",
+      "actualUrl": "https://www.saucedemo.com/cart.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "[data-test=\"shopping-cart-link\"]"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=5",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=5",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_4_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=1",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=1",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_0_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=2",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=2",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_1_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=6",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=6",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_5_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=3",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=3",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_2_img_link"
+      ]
+    },
+    {
+      "url": "https://www.saucedemo.com/inventory-item.html?id=4",
+      "actualUrl": "https://www.saucedemo.com/inventory-item.html?id=4",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "client-side-navigation",
+      "rootUrl": "https://www.saucedemo.com/inventory.html",
+      "clickPath": [
+        "#item_3_img_link"
+      ]
+    }
+  ],
+  "brokenLinks": [],
+  "brokenAssets": [],
+  "spaRoutedPages": [
+    "https://www.saucedemo.com/cart.html",
+    "https://www.saucedemo.com/inventory-item.html?id=5",
+    "https://www.saucedemo.com/inventory-item.html?id=1",
+    "https://www.saucedemo.com/inventory-item.html?id=2",
+    "https://www.saucedemo.com/inventory-item.html?id=6",
+    "https://www.saucedemo.com/inventory-item.html?id=3",
+    "https://www.saucedemo.com/inventory-item.html?id=4"
+  ]
+}

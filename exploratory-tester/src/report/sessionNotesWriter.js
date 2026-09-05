@@ -64,6 +64,15 @@ function collectDeterministicFindings(pageSummaries) {
         if (form.networkRequestFiredOnEmptySubmit) {
           items.push({ page: page.url, heuristics: ["User Expectations", "Statutes/Standards", "CRUD-Create"], severity: "medium", confidence: "medium", observation: `Form "${form.formId}" fired a network request even when submitted empty — client-side validation may be missing or incomplete.` });
         }
+        if (form.sameErrorTextAcrossScenarios) {
+          items.push({
+            page: page.url,
+            heuristics: ["Explainability"],
+            severity: "medium",
+            confidence: "high",
+            observation: `Form "${form.formId}" shows the identical error text ("${form.errorTextOnEmptySubmit}") whether submitted completely empty or submitted with a non-numeric value in "${form.numericFieldProbed}" — the message doesn't identify which field or which problem actually caused it.`,
+          });
+        }
       }
       for (const cb of fv.cancelButtonProbes || []) {
         if (cb.triggeredNetworkRequest) {
@@ -71,7 +80,151 @@ function collectDeterministicFindings(pageSummaries) {
         }
       }
     }
+
+    const ip = page.interactionProbeFindings;
+    if (ip) {
+      for (const control of ip.directionalControls || []) {
+        if (control.directionClaimMismatch) {
+          const m = control.directionClaimMismatch;
+          items.push({
+            page: page.url,
+            heuristics: ["User Expectations"],
+            severity: "high",
+            confidence: "high",
+            observation: `Selecting "${m.label}" (a "${m.claimedDirection === "asc" ? "low to high / ascending" : "high to low / descending"}" option) produced values that are NOT actually in that order: ${JSON.stringify(m.observedValues)}.`,
+          });
+        } else if (control.allSelectionsProducedIdenticalContent && (control.optionsProbed || []).length >= 2) {
+          items.push({
+            page: page.url,
+            heuristics: ["Purpose"],
+            severity: "medium",
+            confidence: "medium",
+            observation: `Control "${control.controlId}" has ${control.optionsProbed.length} options (${control.optionsProbed.join(", ")}) but selecting any of them produces identical page content — the control appears to do nothing.`,
+          });
+        } else if ((control.someSelectionsProducedNoChange || []).length > 0) {
+          items.push({
+            page: page.url,
+            heuristics: ["Purpose"],
+            severity: "medium",
+            confidence: "medium",
+            observation: `Control "${control.controlId}": selecting ${JSON.stringify(control.someSelectionsProducedNoChange)} produced no visible change, while other options on the same control did change the page.`,
+          });
+        }
+      }
+      for (const s of ip.searchProbes || []) {
+        if (s.contentChangedAtAll === false) {
+          items.push({ page: page.url, heuristics: ["Purpose"], severity: "high", confidence: "high", observation: `Typing a query into search input "${s.inputId}" and pressing Enter produced no change to the page — the search control appears to be wired to nothing.` });
+        }
+      }
+      for (const p of ip.paginationProbes || []) {
+        if (p.control === "next" && !p.contentChanged && !p.statusChanged) {
+          items.push({ page: page.url, heuristics: ["Purpose", "CRUD-Read"], severity: "high", confidence: "high", observation: `Clicking "Next" (status showed "${p.statusBefore}", implying more than one page) produced no change to the page content or page-status text — pagination appears to be non-functional, making most of the list unreachable.` });
+        }
+      }
+      for (const cb of ip.checkboxRoundTrip || []) {
+        if (cb.persistedCorrectly === false) {
+          items.push({
+            page: page.url,
+            heuristics: ["User Expectations", "CRUD-Update"],
+            severity: "high",
+            confidence: "high",
+            observation: `Checkbox "${cb.checkboxId}" was set to ${cb.toggledTo} and the form saved, but after a fresh page load it reads back as ${cb.afterReload} — the saved value does not match what was submitted (possibly inverted or not persisted at all).`,
+          });
+        }
+      }
+    }
   }
+  return items.map((item) => ({ ...item, source: "deterministic" }));
+}
+
+/**
+ * The CRUD smoke flow's step data previously only appeared as a raw JSON dump
+ * (see renderCrudSection below) — genuinely useful evidence, but never turned
+ * into a tagged finding that "Findings by Heuristic" / "CRUD Findings" or the
+ * comparison adjudicator would see as a first-class result. This extracts the
+ * headline signals from each step type into the same finding shape everything
+ * else uses.
+ */
+function collectCrudSmokeFindings(crudSmoke, listPageUrl) {
+  if (!crudSmoke) return [];
+  const items = [];
+  const byStep = (name) => crudSmoke.steps.find((s) => s.step === name);
+
+  const readAfterCreate = byStep("read-after-create");
+  if (readAfterCreate && readAfterCreate.foundOnListPage === false) {
+    items.push({
+      page: listPageUrl,
+      heuristics: ["CRUD-Create", "Claims"],
+      severity: "high",
+      confidence: "high",
+      observation: `Creating a new record via the UI completed without any visible error, but the new record never actually appears on the list page afterward — the create action silently does not persist.`,
+    });
+  }
+
+  for (const step of crudSmoke.steps.filter((s) => s.step.startsWith("update-") && !s.step.includes("race"))) {
+    if (step.skipped) continue;
+    if (step.intendedItemReflectsUpdate === false) {
+      items.push({
+        page: step.itemUrl,
+        heuristics: ["CRUD-Update"],
+        severity: "medium",
+        confidence: "medium",
+        observation: `Editing and saving this record does not result in the change being visible afterward — the update does not appear to persist for this record.`,
+      });
+    }
+    if (step.otherRecordsThatChangedUnexpectedly?.length) {
+      items.push({
+        page: step.itemUrl,
+        heuristics: ["CRUD-Update"],
+        severity: "high",
+        confidence: "high",
+        observation: `Editing this record changed a DIFFERENT record instead/as well: ${JSON.stringify(step.otherRecordsThatChangedUnexpectedly)}. This is a strong signal of an index-vs-id mismatch in how updates are applied.`,
+      });
+    }
+  }
+
+  const raceStep = byStep("update-double-submit-race");
+  if (raceStep && raceStep.saveButtonDisabledAfterFirstClick === false && (raceStep.mutatingRequestsFiredFromTwoRapidClicks || 0) >= 2) {
+    items.push({
+      page: raceStep.editUrl,
+      heuristics: ["CRUD-Update"],
+      severity: "medium",
+      confidence: "high",
+      observation: `The Save button is not disabled while a save is in flight — two rapid clicks fired ${raceStep.mutatingRequestsFiredFromTwoRapidClicks} separate mutating requests, risking a lost update on a slow network or an impatient double-click.`,
+    });
+  }
+
+  const deleteStep = byStep("delete");
+  if (deleteStep && deleteStep.stillVisibleInSameSessionAfterDelete === true) {
+    items.push({
+      page: listPageUrl,
+      heuristics: ["CRUD-Delete"],
+      severity: "medium",
+      confidence: "high",
+      observation: `After deleting a record, it still appears on the list page within the same browser session until a hard refresh — the list view is using stale cached data that isn't invalidated on delete.`,
+    });
+  }
+  if (deleteStep && deleteStep.confirmDialogMessage) {
+    items.push({
+      page: deleteStep.deleteEditUrl,
+      heuristics: ["CRUD-Delete", "Claims"],
+      severity: "low",
+      confidence: "low",
+      observation: `Delete confirmation dialog text: "${deleteStep.confirmDialogMessage}" — worth checking this claim (e.g. about recoverability) against what deletion actually does server-side.`,
+    });
+  }
+
+  const page2Step = byStep("read-beyond-page-1");
+  if (page2Step?.attempted && !page2Step.reached) {
+    items.push({
+      page: listPageUrl,
+      heuristics: ["CRUD-Read", "Purpose"],
+      severity: "high",
+      confidence: "high",
+      observation: `A "Next"-like pagination control exists but clicking it produced no change to the page — content beyond the first page is unreachable through the UI, and could not be explored this session as a result.`,
+    });
+  }
+
   return items.map((item) => ({ ...item, source: "deterministic" }));
 }
 
@@ -99,7 +252,10 @@ function renderCrudSection(crudSmoke) {
 
 export function writeSessionNotes(config, scanOutput, aiOutput) {
   const { pageSummaries, summary, crudSmokeResult, runDir } = scanOutput;
-  const deterministicFindings = collectDeterministicFindings(pageSummaries);
+  const deterministicFindings = [
+    ...collectDeterministicFindings(pageSummaries),
+    ...collectCrudSmokeFindings(crudSmokeResult, summary.baseUrl),
+  ];
   const perPageFindings = aiOutput?.perPageFindings || [];
   const synthesis = aiOutput?.synthesis || { overallSummary: "", crossPageFindings: [], prioritizedIssues: [] };
 

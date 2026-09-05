@@ -107,6 +107,77 @@ async function findFirstItemLink(page, listUrl) {
   return null;
 }
 
+/** Up to `count` distinct item detail links from the list page, for testing
+ * update against more than one record — a single record can accidentally
+ * land on the correct index and hide an index-vs-id bug that only some
+ * records trigger (see README.md Recommendations #2). */
+async function findMultipleItemLinks(page, listUrl, count) {
+  await page.goto(listUrl, { waitUntil: "networkidle", timeout: 15000 }).catch(() => null);
+  const hrefs = await page.locator(".card a[href], a[href] .card, .grid a[href]").evaluateAll((els) =>
+    els.map((el) => (el.tagName === "A" ? el.getAttribute("href") : el.closest("a")?.getAttribute("href"))).filter(Boolean)
+  );
+  const unique = [...new Set(hrefs)];
+  // Keep the raw href alongside the resolved URL so callers can match it back
+  // against snapshotListItems()'s map keys (which use the same raw href) without
+  // any relative/absolute URL reconstruction guesswork.
+  return unique.slice(0, count).map((href) => ({ href, url: new URL(href, listUrl).toString() }));
+}
+
+/** {href: visibleText} snapshot of every list-item link, used to detect when
+ * saving one record silently changed a DIFFERENT one. Deliberately bypasses
+ * any client-side caching (sessionStorage/localStorage) before reading — a
+ * page that caches its list client-side (a legitimate, separate finding in
+ * its own right, tested elsewhere) would otherwise make every snapshot in
+ * this diff read identical stale data regardless of what actually changed
+ * server-side, masking exactly the bug this function exists to catch. */
+async function snapshotListItems(page, listUrl) {
+  await page.goto(listUrl, { waitUntil: "networkidle", timeout: 15000 }).catch(() => null);
+  await page
+    .evaluate(() => {
+      try {
+        sessionStorage.clear();
+        localStorage.clear();
+      } catch {
+        /* storage may be unavailable (e.g. sandboxed iframe) — fine to ignore */
+      }
+    })
+    .catch(() => {});
+  await page.reload({ waitUntil: "networkidle", timeout: 15000 }).catch(() => null);
+  const items = await page.locator(".card a[href], a[href] .card, .grid a[href]").evaluateAll((els) =>
+    els.map((el) => {
+      const anchor = el.tagName === "A" ? el : el.closest("a");
+      return { href: anchor?.getAttribute("href") || null, text: el.textContent.trim() };
+    })
+  );
+  const byHref = new Map();
+  for (const item of items) {
+    if (item.href && !byHref.has(item.href)) byHref.set(item.href, item.text);
+  }
+  return byHref;
+}
+
+/** Clicks a "Next"-like control once and reports whether it actually moved
+ * to different content — honest about pagination being unreachable rather
+ * than silently only ever testing page 1 (see README.md Recommendations #2). */
+async function attemptToReachPage2(page, listUrl) {
+  await page.goto(listUrl, { waitUntil: "networkidle", timeout: 15000 }).catch(() => null);
+  const nextButton = page.getByRole("button", { name: /^next\b/i }).or(page.getByRole("link", { name: /^next\b/i }));
+  if ((await nextButton.count().catch(() => 0)) === 0) {
+    return { attempted: false, reached: false, reason: "no Next-like control found" };
+  }
+  const before = await page.locator("body").innerText();
+  await nextButton.first().click().catch(() => {});
+  await page.waitForTimeout(400);
+  const after = await page.locator("body").innerText();
+  const reached = before !== after;
+  let page2ItemUrl = null;
+  if (reached) {
+    const href = await page.locator(".card a[href], a[href] .card, .grid a[href]").first().getAttribute("href").catch(() => null);
+    if (href) page2ItemUrl = new URL(href, listUrl).toString();
+  }
+  return { attempted: true, reached, page2ItemUrl };
+}
+
 export async function runCrudSmoke(context, baseUrl, candidatePages) {
   const page = await context.newPage();
   const dialogMessages = [];
@@ -116,7 +187,13 @@ export async function runCrudSmoke(context, baseUrl, candidatePages) {
   });
 
   const result = { steps: [], dialogMessages };
-  const tag = `ZZZ-PROBE-${Date.now()}`;
+  // "AAA-" (not "ZZZ-") deliberately — on a list sorted alphabetically ascending
+  // (a common default), a renamed record sorts to the very FRONT and stays on
+  // page 1, where snapshotListItems() can actually see it changed. A "ZZZ-"
+  // prefix sorts a renamed record to the far end instead, often pushing it off
+  // a paginated first page entirely — making a real change look like nothing
+  // happened, rather than like a change. Found by testing this against the app.
+  const tag = `AAA-PROBE-${Date.now()}`;
 
   // --- CREATE ---
   const createUrl = await findCreatePage(page, candidatePages);
@@ -137,47 +214,108 @@ export async function runCrudSmoke(context, baseUrl, candidatePages) {
     result.steps.push({ step: "create", skipped: true, reason: "no create-like form found among crawled pages" });
   }
 
-  // --- UPDATE ---
+  // --- UPDATE (against multiple distinct records) ---
   const listUrl = await findListPage(page, candidatePages, baseUrl);
-  const beforeSnapshot = await page.locator("body").innerText();
-  const itemUrl = await findFirstItemLink(page, listUrl);
-  let editUrl = null;
-  let originalName = null;
+  const itemLinks = await findMultipleItemLinks(page, listUrl, 3);
 
-  if (itemUrl) {
-    await page.goto(itemUrl, { waitUntil: "networkidle" }).catch(() => null);
-    await page.locator("h1").first().filter({ hasNotText: "" }).waitFor({ timeout: 5000 }).catch(() => null);
-    originalName = (await page.locator("h1").first().textContent().catch(() => null))?.trim() || null;
-    const editLink = page.getByRole("link", { name: /edit/i }).first();
-    const editHref = await editLink.getAttribute("href").catch(() => null);
-    if (editHref) editUrl = new URL(editHref, itemUrl).toString();
+  if (itemLinks.length === 0) {
+    result.steps.push({ step: "update", skipped: true, reason: "could not find any item detail links from the list page" });
+  } else {
+    for (const [index, { href: itemHref, url: itemUrl }] of itemLinks.entries()) {
+      const beforeItems = await snapshotListItems(page, listUrl);
+
+      await page.goto(itemUrl, { waitUntil: "networkidle" }).catch(() => null);
+      await page.locator("h1").first().filter({ hasNotText: "" }).waitFor({ timeout: 5000 }).catch(() => null);
+      const originalName = (await page.locator("h1").first().textContent().catch(() => null))?.trim() || null;
+      const editLink = page.getByRole("link", { name: /edit/i }).first();
+      const editHref = await editLink.getAttribute("href").catch(() => null);
+      const editUrl = editHref ? new URL(editHref, itemUrl).toString() : null;
+
+      if (!editUrl) {
+        result.steps.push({ step: `update-${index}`, itemUrl, skipped: true, reason: "no edit link found from this item's detail page" });
+        continue;
+      }
+
+      const updatedTag = `${tag}-UPDATED-${index}`;
+      await page.goto(editUrl, { waitUntil: "networkidle" });
+      await fillFormGenerically(page, updatedTag);
+      const saveBtn = page.getByRole("button", { name: /^save/i }).first();
+      await saveBtn.click().catch(() => {});
+      await page.waitForTimeout(600);
+
+      const afterItems = await snapshotListItems(page, listUrl);
+      const intendedItemReflectsUpdate = (afterItems.get(itemHref) || "").includes(updatedTag);
+
+      // Any OTHER record (not the one we intended to edit) whose displayed text
+      // changed is a generic, deterministic signal of an index-vs-id style bug
+      // like CRUD-04 — no knowledge of *why* it changed is needed to flag it.
+      const otherRecordsThatChangedUnexpectedly = [];
+      for (const [href, beforeText] of beforeItems) {
+        if (href === itemHref) continue;
+        const afterText = afterItems.get(href);
+        if (afterText !== undefined && afterText !== beforeText) {
+          otherRecordsThatChangedUnexpectedly.push({ href, beforeText, afterText });
+        }
+      }
+      // Also check the reverse direction: a record that wasn't visible in this
+      // view BEFORE (e.g. off the first page) but now carries updatedTag is the
+      // wrong-record write landing somewhere that only became visible because
+      // the rename itself changed its sort position — still the same bug class,
+      // just missed by the "existing href changed" check above on its own.
+      for (const [href, afterText] of afterItems) {
+        if (href === itemHref || beforeItems.has(href)) continue;
+        if (afterText.includes(updatedTag)) {
+          otherRecordsThatChangedUnexpectedly.push({ href, beforeText: "(not visible in this view before the edit)", afterText });
+        }
+      }
+
+      result.steps.push({
+        step: `update-${index}`,
+        itemUrl,
+        editUrl,
+        originalName,
+        updatedTag,
+        intendedItemReflectsUpdate,
+        otherRecordsThatChangedUnexpectedly,
+      });
+    }
+
+    // --- Rapid double-submit race test (on the last edited record's edit page) ---
+    const lastEditUrl = result.steps.filter((s) => s.editUrl).slice(-1)[0]?.editUrl;
+    if (lastEditUrl) {
+      await page.goto(lastEditUrl, { waitUntil: "networkidle" }).catch(() => null);
+      await fillFormGenerically(page, `${tag}-RACE`);
+      const saveBtn = page.getByRole("button", { name: /^save/i }).first();
+      let requestCount = 0;
+      const onRequest = (req) => {
+        if (req.method() !== "GET") requestCount += 1;
+      };
+      page.on("request", onRequest);
+      await saveBtn.click().catch(() => {});
+      const disabledImmediatelyAfterFirstClick = await saveBtn.isDisabled().catch(() => null);
+      await saveBtn.click().catch(() => {}); // rapid second click before the first request resolves
+      await page.waitForTimeout(600);
+      page.off("request", onRequest);
+      result.steps.push({
+        step: "update-double-submit-race",
+        editUrl: lastEditUrl,
+        saveButtonDisabledAfterFirstClick: disabledImmediatelyAfterFirstClick,
+        mutatingRequestsFiredFromTwoRapidClicks: requestCount,
+      });
+    }
   }
 
-  if (editUrl) {
-    await page.goto(editUrl, { waitUntil: "networkidle" });
-    const updatedTag = `${tag}-UPDATED`;
-    await fillFormGenerically(page, updatedTag);
-    const saveBtn = page.getByRole("button", { name: /^save/i }).first();
-    await saveBtn.click().catch(() => {});
-    await page.waitForTimeout(600);
-
-    await page.goto(listUrl, { waitUntil: "networkidle" });
-    const afterSnapshot = await page.locator("body").innerText();
-
-    const updatedNameVisible = afterSnapshot.includes(updatedTag);
-    const originalStillPresentElsewhere = originalName ? afterSnapshot.includes(originalName) : null;
-
+  // --- Reach beyond page 1 (honest about whether pagination is actually usable) ---
+  const page2Attempt = await attemptToReachPage2(page, listUrl);
+  if (page2Attempt.reached && page2Attempt.page2ItemUrl) {
+    const res = await page.goto(page2Attempt.page2ItemUrl, { waitUntil: "networkidle", timeout: 15000 }).catch(() => null);
     result.steps.push({
-      step: "update",
-      editUrl,
-      originalName,
-      updatedTag,
-      updatedValueVisibleOnListAfterUpdate: updatedNameVisible,
-      snapshotChanged: beforeSnapshot !== afterSnapshot,
-      note: "Compare updatedTag visibility and originalName persistence manually / via AI review — a generic diff can suggest but not prove which specific record changed.",
+      step: "read-beyond-page-1",
+      ...page2Attempt,
+      page2ItemLoadedOk: res ? res.status() < 400 : null,
     });
   } else {
-    result.steps.push({ step: "update", skipped: true, reason: "could not find an item detail + edit link from the list page" });
+    result.steps.push({ step: "read-beyond-page-1", ...page2Attempt });
   }
 
   // --- DELETE ---

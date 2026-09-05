@@ -1,0 +1,16 @@
+{
+  "forms": [
+    {
+      "formId": "newItemForm",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": false,
+      "errorIndicatorShown": true,
+      "errorTextOnEmptySubmit": "Something went wrong. Please check the form and try again.",
+      "numericFieldProbed": "price",
+      "errorTextOnInvalidType": "Something went wrong. Please check the form and try again.",
+      "networkRequestFiredOnInvalidType": false,
+      "sameErrorTextAcrossScenarios": true
+    }
+  ],
+  "cancelButtonProbes": []
+}

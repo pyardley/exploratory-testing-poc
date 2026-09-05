@@ -6,6 +6,10 @@ test-app/server/data/db.json
 exploratory-tester/runs/*/
 comparison/reports/*.md
 comparison/reports/*.json
+regression/test-results/
+regression/playwright-report/
+exploratory-tester/.playwright-mcp/
+external-validation/*/storage-state.json
 
 # keep placeholders
 !exploratory-tester/runs/.gitkeep

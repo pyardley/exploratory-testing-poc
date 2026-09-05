@@ -1,0 +1,91 @@
+{
+  "url": "http://localhost:4173/catalog.html",
+  "slug": "catalog.html",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Catalog — WidgetWorks",
+  "navError": null,
+  "headings": [
+    "Catalog",
+    "Anodized Standoff Set",
+    "Anti-Vibration Washer Set",
+    "Aurora Hex Bolt Set",
+    "Bench Vise Jaw Pads",
+    "Brass Knurled Thumbscrew",
+    "Brushed Drawer Pull",
+    "Cable Tension Meter",
+    "Carbon Fiber Spacer Kit"
+  ],
+  "badgeLikeText": [],
+  "footerText": "© 2019 WidgetWorks",
+  "consoleErrorCount": 3,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 3,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [
+    {
+      "type": "primary-button-color-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary button background (rgb(44, 111, 187)) differs from the golden reference's primary color (rgb(59, 111, 160)), distance=30.9."
+    }
+  ],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [
+      {
+        "controlId": "custom-dropdown-0",
+        "optionsProbed": [
+          "Name (A–Z)",
+          "Price: Low to High",
+          "Price: High to Low"
+        ],
+        "allSelectionsProducedIdenticalContent": false,
+        "someSelectionsProducedNoChange": [],
+        "directionClaimMismatch": {
+          "label": "Price: Low to High",
+          "claimedDirection": "asc",
+          "observedValues": [
+            42,
+            34.99,
+            29.99,
+            27,
+            22.5,
+            19.9,
+            18.4,
+            16.8
+          ]
+        }
+      }
+    ],
+    "searchProbes": [
+      {
+        "inputId": "searchInput",
+        "typedNonsenseQuery": true,
+        "contentChangedAtAll": false
+      }
+    ],
+    "paginationProbes": [
+      {
+        "control": "next",
+        "statusBefore": "Page 1 of 3",
+        "statusAfter": "Page 1 of 3",
+        "contentChanged": false,
+        "statusChanged": false
+      }
+    ],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/catalog.html/screenshot-full.png",
+    "domSnapshot": "pages/catalog.html/dom-snapshot.html",
+    "textContent": "pages/catalog.html/text-content.txt"
+  }
+}

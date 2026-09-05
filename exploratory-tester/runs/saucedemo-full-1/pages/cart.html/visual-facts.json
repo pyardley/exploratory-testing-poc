@@ -1,0 +1,12 @@
+{
+  "facts": {
+    "logo": null,
+    "primaryButton": null,
+    "containerPadding": null,
+    "formFieldSpacing": null,
+    "bodyFontFamily": "\"DM Sans\", Arial, Helvetica, sans-serif",
+    "hasInterFontLink": false,
+    "hasFaviconLink": true
+  },
+  "deviationsFromGolden": []
+}

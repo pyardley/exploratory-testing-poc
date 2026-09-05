@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "areaExplored": { "type": "string" },
+    "actionsPerformed": { "type": "array", "items": { "type": "string" }, "description": "Concrete actions actually taken via the browser tool, in order, e.g. 'clicked the sort trigger', 'selected Price: Low to High'." },
+    "toolReliabilityNotes": { "type": "string", "description": "Honest account of whether the browser tool worked as expected — any errors, empty results, retries, or things that had to be worked around." },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "observation": { "type": "string" },
+          "heuristics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["Familiarity", "Explainability", "World", "History", "Image", "Comparable Products", "Claims", "User Expectations", "Purpose", "Statutes/Standards", "CRUD-Create", "CRUD-Read", "CRUD-Update", "CRUD-Delete"]
+            }
+          },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+          "evidenceNote": { "type": "string", "description": "What you actually saw that supports this (e.g. exact text read, exact behavior observed) — not a guess." }
+        },
+        "required": ["observation", "heuristics", "severity", "confidence"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["areaExplored", "actionsPerformed", "toolReliabilityNotes", "findings"],
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+{
+  "name": "regression",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Regression tests generated from confirmed exploratory-tester findings, plus the scaffolded Playwright Planner/Generator/Healer agents (.claude/agents/) that would author/repair them in a live session rooted here.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

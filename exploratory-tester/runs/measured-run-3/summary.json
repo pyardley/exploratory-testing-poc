@@ -1,0 +1,13 @@
+{
+  "runId": "measured-run-3",
+  "baseUrl": "http://localhost:4173",
+  "goldenUrl": "http://localhost:4173/index.html",
+  "scannedAt": "2026-09-04T14:56:32.538Z",
+  "pagesScanned": 9,
+  "totalBrokenLinks": 0,
+  "totalBrokenAssets": 1,
+  "totalConsoleErrors": 3,
+  "totalAccessibilityViolations": 1,
+  "totalVisualDeviations": 3,
+  "crudSmokeRan": true
+}
