@@ -1,0 +1,99 @@
+{
+  "overallSummary": "This session covered the Shady Meadows B&B / Restful Booker platform across seven pages: the home page, the admin login, the cookie policy, the privacy policy, and three reservation detail pages reached directly from the home page's \"Book now\" buttons. The most critical functional finding is that the entire booking conversion path is broken end-to-end: every \"Book now\" CTA on the home page links to a reservation detail page that fails with a bad API response and renders nothing but an infinite spinner with no error recovery. Legal compliance is also a serious concern: the Cookie Policy and Privacy Policy both reference the wrong data controller, and they name *different* wrong entities (Automation in Testing Online vs MW Test Consultancy), meaning two legal documents on the same site contradict each other about who operates it. The admin area surfaces as a completely different product shell with its own brand (\"Restful Booker Platform Demo\") and navigation structure — visible only when compared against any other page. Across all seven pages, the `<title>` element is never customized per route, and shared footer components carry repeating WCAG AA contrast and accessible-name failures. Taken together, the site has a foundational identity and platform-configuration problem layered beneath a set of specific but severe functional, accessibility, and content defects.",
+  "crossPageFindings": [
+    {
+      "observation": "Every 'Book now' button on the home page room cards links to /reservation/1, /reservation/2, and /reservation/3. All three destination pages fail identically: a bad API response produces an infinite Bootstrap spinner with no error message, no retry control, and no fallback UI. The home page presents a credible, functional-looking booking flow; the destination pages prove it is completely non-functional. Neither page alone reveals the full failure — you need both to see that the primary conversion path of the site is end-to-end broken.",
+      "pagesInvolved": [
+        "http://localhost (home — room card 'Book now' links)",
+        "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+        "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+        "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06"
+      ],
+      "heuristics": [
+        "Purpose",
+        "User Expectations",
+        "CRUD-Create",
+        "CRUD-Read"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The Cookie Policy body repeatedly names 'Automation in Testing Online' as the data controller. The Privacy Policy body names 'MW Test Consultancy' at 'https://automationintesting.online' as the data controller. Both are wrong (the site is Shady Meadows B&B), but they name *different* wrong entities. Two legal pages on the same site cannot agree on who is responsible for user data — a direct factual contradiction between pages that neither page alone reveals.",
+      "pagesInvolved": [
+        "http://localhost/cookie",
+        "http://localhost/privacy"
+      ],
+      "heuristics": [
+        "Claims",
+        "Statutes/Standards",
+        "World"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "The admin page renders a completely different navbar brand — 'Restful Booker Platform Demo' in a dark Bootstrap navbar with nav items ['Restful Booker Platform Demo', 'Front Page', 'Logout'] — while every other page in the session renders 'Shady Meadows B&B' in a white navbar with items ['Rooms', 'Booking', 'Amenities', 'Location', 'Contact', 'Admin']. Confirmed by comparing admin DOM against cookie/home DOM snapshots. The admin shell appears to be an entirely different application template, not a themed admin view of the same product.",
+      "pagesInvolved": [
+        "http://localhost/admin",
+        "http://localhost (home)",
+        "http://localhost/cookie"
+      ],
+      "heuristics": [
+        "Image",
+        "Familiarity",
+        "Comparable Products"
+      ],
+      "severity": "high",
+      "confidence": "high"
+    },
+    {
+      "observation": "Every page in this session — home, admin, cookie, privacy, reservation/1, reservation/2, reservation/3 — carries exactly the same `<title>Restful-booker-platform demo</title>` with the same meta description 'A platform for testing restful web services'. No route sets a per-page title. Confirmed across all seven DOM snapshots. A user with multiple tabs open (e.g. browsing rooms, viewing a reservation, then returning to the home page) cannot distinguish tabs; screen readers announce the same identity on every page load; bookmarks are indistinguishable.",
+      "pagesInvolved": [
+        "http://localhost (home)",
+        "http://localhost/admin",
+        "http://localhost/cookie",
+        "http://localhost/privacy",
+        "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+        "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+        "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06"
+      ],
+      "heuristics": [
+        "Image",
+        "User Expectations",
+        "Explainability"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    },
+    {
+      "observation": "The footer social-media icon buttons (Facebook, Instagram, Twitter) are identically broken across every page that shares the footer shell: all three use href='#', have no visible text, no aria-label, and no title attribute. Confirmed in DOM snapshots for the home page and the cookie page (which mirrors the home shell). This is a shared component defect reproduced on every page with the standard layout — not an isolated oversight on one page. The pattern is also true of the footer 'Quick Links' column (all four links href='#') and the four footer text links that fail WCAG AA contrast (3.42:1 vs 4.5:1 required).",
+      "pagesInvolved": [
+        "http://localhost (home)",
+        "http://localhost/cookie",
+        "http://localhost/privacy"
+      ],
+      "heuristics": [
+        "Statutes/Standards",
+        "Purpose",
+        "Familiarity"
+      ],
+      "severity": "medium",
+      "confidence": "high"
+    }
+  ],
+  "prioritizedIssues": [
+    "CRITICAL — End-to-end booking path is fully broken: all three home-page 'Book now' CTAs link to /reservation/1, /reservation/2, /reservation/3, and every one of those pages fails with a bad API response, producing only an infinite spinner with no error message and no recovery path. The site's primary purpose — allowing a user to book a room — is completely non-functional.",
+    "HIGH — Legal pages name contradictory wrong data controllers: the Cookie Policy body names 'Automation in Testing Online' while the Privacy Policy body names 'MW Test Consultancy' at automationintesting.online. Neither is correct (Shady Meadows B&B should be the controller), and the two pages actively contradict each other — a compliance, brand, and legal-accuracy failure on the site's most legally significant pages.",
+    "HIGH — Admin page is an entirely different product shell: the /admin navbar brand reads 'Restful Booker Platform Demo' with a different layout, color scheme, and nav items from every other page on the site. This is consistent with a deployment misconfiguration where a different application template is serving at /admin.",
+    "HIGH — Privacy Policy content is rendered client-side only: the /privacy DOM and extracted text contain only the homepage shell; the policy appears as a JS-injected overlay. Users without JavaScript, screen readers that read the initial document outline, and search engines see no privacy policy content whatsoever.",
+    "HIGH — 'Amenities' nav link targets a non-existent section: href='/#amenities' points to an element that does not exist on the page. All users who click this nav item are silently left at the top of the page with no feedback. Navigation makes a promise the page cannot keep.",
+    "HIGH — Booking form labels are programmatically disconnected from their inputs: the Check In and Check Out date inputs inside the react-datepicker wrapper carry no id attribute, so their labels (for='checkin', for='checkout') reference nothing. The contact form Message label (for='message') targets a textarea with id='description'. Both are confirmed WCAG critical violations.",
+    "HIGH — All three room card images carry alt='Single Room' regardless of room type: room2.jpg (Double) and room3.jpg (Suite) both have the same wrong alt text as the Single room. Screen reader users are told every room is a Single Room, directly contradicting visible card headings.",
+    "MEDIUM — 'Logout' button displayed on the admin login page before any authentication has occurred: the button is logically incoherent at this state, and its foreground/background color combination (3.4:1) also fails WCAG AA contrast — a double failure on the same control.",
+    "MEDIUM — Page <title> is never customized for any route: all seven pages in this session share the title 'Restful-booker-platform demo' and meta description 'A platform for testing restful web services'. Browser tab identification, bookmarks, screen reader announcements, and search-engine snippets are indistinguishable across the whole site.",
+    "MEDIUM — 'Getting Here' section on the home page contains the same marketing hero copy that appears in the hero section and the footer, instead of any wayfinding directions. The section heading sets a clear user expectation that is completely unmet.",
+    "MEDIUM — Shared footer carries systemic WCAG AA violations on every page: four footer links fail contrast (3.42:1 vs 4.5:1 required), and three social-media icon buttons have no accessible name at all (confirmed link-name violations). All three social links also resolve to href='#'. Because these are in a shared component, fixing them once fixes them everywhere.",
+    "LOW — All three room description paragraphs are Lorem Ipsum placeholder text. No real room description is present for any room type, undermining brand credibility for any visitor who reads the cards."
+  ]
+}

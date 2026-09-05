@@ -1,0 +1,32 @@
+{
+  "facts": {
+    "logo": null,
+    "primaryButton": {
+      "text": "Login",
+      "backgroundColor": "rgb(13, 110, 253)",
+      "borderRadius": "6px",
+      "padding": "6px 12px"
+    },
+    "containerPadding": "12px",
+    "formFieldSpacing": null,
+    "bodyFontFamily": "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", \"Noto Sans\", \"Liberation Sans\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "hasInterFontLink": false,
+    "hasFaviconLink": false
+  },
+  "deviationsFromGolden": [
+    {
+      "type": "primary-button-radius-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary/submit button border-radius (6px) differs from the golden reference (8px)."
+    },
+    {
+      "type": "primary-button-padding-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary/submit button padding (6px 12px) differs from the golden reference (8px 16px) by up to 4.0px."
+    }
+  ]
+}

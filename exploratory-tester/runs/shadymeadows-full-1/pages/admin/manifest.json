@@ -1,0 +1,97 @@
+{
+  "url": "http://localhost/admin",
+  "slug": "admin",
+  "reachedVia": "direct-nav",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Restful-booker-platform demo",
+  "navError": null,
+  "headings": [
+    "Login"
+  ],
+  "badgeLikeText": [],
+  "footerText": null,
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 0,
+  "badResponseCount": 0,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 1,
+  "accessibilityViolations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "tags": [
+        "cat.color",
+        "wcag2aa",
+        "wcag143",
+        "TTv5",
+        "TT13.c",
+        "EN-301-549",
+        "EN-9.1.4.3",
+        "ACT",
+        "RGAAv4",
+        "RGAA-3.2.1"
+      ],
+      "nodes": [
+        {
+          "target": [
+            ".btn-outline-danger"
+          ],
+          "html": "<button class=\"btn btn-outline-danger my-2 my-sm-0\">Logout</button>",
+          "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.4 (foreground color: #dc3545, background color: #212529, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+        }
+      ]
+    }
+  ],
+  "visualDeviationsFromGolden": [
+    {
+      "type": "primary-button-radius-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary/submit button border-radius (6px) differs from the golden reference (8px)."
+    },
+    {
+      "type": "primary-button-padding-drift",
+      "heuristics": [
+        "Comparable Products"
+      ],
+      "description": "Primary/submit button padding (6px 12px) differs from the golden reference (8px 16px) by up to 4.0px."
+    }
+  ],
+  "navDeviationsFromGolden": [
+    {
+      "type": "nav-mismatch",
+      "description": "Navigation items/order ([\"Restful Booker Platform Demo\",\"Front Page\"]) differ from the golden reference ([\"Shady Meadows B&B\",\"Rooms\",\"Booking\",\"Amenities\",\"Location\",\"Contact\",\"Admin\"])."
+    }
+  ],
+  "formValidationFindings": {
+    "forms": [
+      {
+        "formId": "form-0",
+        "submittedEmpty": true,
+        "networkRequestFiredOnEmptySubmit": true,
+        "errorIndicatorShown": true,
+        "errorTextOnEmptySubmit": null,
+        "numericFieldProbed": null,
+        "errorTextOnInvalidType": null,
+        "networkRequestFiredOnInvalidType": null,
+        "sameErrorTextAcrossScenarios": null
+      }
+    ],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/admin/screenshot-full.png",
+    "domSnapshot": "pages/admin/dom-snapshot.html",
+    "textContent": "pages/admin/text-content.txt"
+  }
+}

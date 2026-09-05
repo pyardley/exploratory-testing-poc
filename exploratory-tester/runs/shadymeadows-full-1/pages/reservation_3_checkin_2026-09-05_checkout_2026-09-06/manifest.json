@@ -1,0 +1,35 @@
+{
+  "url": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+  "slug": "reservation_3_checkin_2026-09-05_checkout_2026-09-06",
+  "reachedVia": "direct-nav",
+  "otherUrlsSharingThisTemplate": [],
+  "title": "Restful-booker-platform demo",
+  "navError": null,
+  "headings": [],
+  "badgeLikeText": [],
+  "footerText": null,
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "pageErrorCount": 1,
+  "badResponseCount": 1,
+  "failedRequestCount": 0,
+  "accessibilityViolationCount": 0,
+  "accessibilityViolations": [],
+  "visualDeviationsFromGolden": [],
+  "navDeviationsFromGolden": [],
+  "formValidationFindings": {
+    "forms": [],
+    "cancelButtonProbes": []
+  },
+  "interactionProbeFindings": {
+    "directionalControls": [],
+    "searchProbes": [],
+    "paginationProbes": [],
+    "checkboxRoundTrip": []
+  },
+  "evidenceFiles": {
+    "screenshot": "pages/reservation_3_checkin_2026-09-05_checkout_2026-09-06/screenshot-full.png",
+    "domSnapshot": "pages/reservation_3_checkin_2026-09-05_checkout_2026-09-06/dom-snapshot.html",
+    "textContent": "pages/reservation_3_checkin_2026-09-05_checkout_2026-09-06/text-content.txt"
+  }
+}

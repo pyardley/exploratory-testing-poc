@@ -1,0 +1,683 @@
+[
+  {
+    "page": "http://localhost (index.html — Shady Meadows B&B home)",
+    "narrative": "The home page is a single-page landing covering hero, booking, rooms, location, and contact sections, with zero console errors and no failed network requests — a clean technical baseline. However, the page carries a cluster of confirmed accessibility violations (label mismatches, contrast failures, icon-only links), a nav item (\"Amenities\") that anchors to a section that does not exist, incorrect alt text duplicated across all three room cards, and a page title that exposes the underlying platform name instead of the brand. The \"Getting Here\" section is populated with marketing copy rather than wayfinding directions, and the social-media links are inoperative stubs. Most findings are objectively verifiable; none required speculation.",
+    "findings": [
+      {
+        "observation": "All three room cards use alt=\"Single Room\" regardless of room type. The Double and Suite images (room2.jpg, room3.jpg) both carry the same incorrect alt text as the Single room. DOM evidence: `<img alt=\"Single Room\" src=\"/images/room2.jpg\">` and `<img alt=\"Single Room\" src=\"/images/room3.jpg\">`.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Claims",
+          "CRUD-Read"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html (room card img elements)",
+          "screenshot-full.png (Our Rooms section)"
+        ],
+        "questionOrRisk": "Screen-reader users are told every room is a \"Single Room\" — directly contradicts the visible Double and Suite headings. Also a factual content error visible in the DOM."
+      },
+      {
+        "observation": "The booking form has `<label for=\"checkin\">Check In</label>` and `<label for=\"checkout\">Check Out</label>`, but the actual date inputs inside the react-datepicker wrapper carry no `id` attribute at all — so the `for` values reference nothing. The axe scanner confirms both inputs as critical label violations.",
+        "heuristics": [
+          "Statutes/Standards",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[1] (label)",
+          "dom-snapshot.html (booking form)"
+        ],
+        "questionOrRisk": "Screen-reader users cannot determine what data each date field expects. The visual label exists but is programmatically disconnected from the control."
+      },
+      {
+        "observation": "The contact form has `<label for=\"message\">Message</label>` but the textarea has `id=\"description\"`. The `for`/`id` values do not match, so the label is not programmatically associated with the field. Confirmed by the axe `label` violation on `#description`.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[1] (label, #description node)",
+          "dom-snapshot.html (contact form)"
+        ],
+        "questionOrRisk": "Keyboard and screen-reader users cannot reliably identify the Message field. A fix that changes `for=\"message\"` to `for=\"description\"` (or vice-versa) would resolve this."
+      },
+      {
+        "observation": "The main navigation includes an \"Amenities\" link (`href=\"/#amenities\"`) but the page contains no element with `id=\"amenities\"` and no \"Amenities\" heading. The link will silently no-op (scroll to top) rather than navigating to the promised section.",
+        "heuristics": [
+          "Purpose",
+          "Claims",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html (navbar nav-item Amenities)",
+          "text-content.txt (headings: no Amenities heading present)"
+        ],
+        "questionOrRisk": "Users clicking \"Amenities\" get no feedback that the section is missing — they simply stay at the top of the page. Either the section was removed without updating the nav, or it was never built."
+      },
+      {
+        "observation": "The browser tab `<title>` is \"Restful-booker-platform demo\" — the platform's internal name — not \"Shady Meadows B&B\". Every other visible brand element uses the B&B name. A prospective customer bookmarking or tab-switching would see the platform name, not the business name.",
+        "heuristics": [
+          "Image",
+          "Claims"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "manifest title field",
+          "dom-snapshot.html (<title> element)"
+        ],
+        "questionOrRisk": "Undermines brand presentation; also affects SEO and screen-reader page identification."
+      },
+      {
+        "observation": "The \"Getting Here\" subsection under Contact Information contains the generic welcome marketing paragraph (\"Welcome to Shady Meadows, a delightful Bed & Breakfast nestled in the hills…\") verbatim — identical to the hero copy and the footer copy. It contains no directions, landmarks, parking information, or transport links.",
+        "heuristics": [
+          "Purpose",
+          "Claims"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "text-content.txt lines 66–68",
+          "screenshot-full.png (location section)"
+        ],
+        "questionOrRisk": "The heading \"Getting Here\" sets a clear user expectation for wayfinding content. Marketing filler instead of directions fails that purpose and could frustrate a customer trying to find the property."
+      },
+      {
+        "observation": "Four footer links fail WCAG 2.0 AA colour contrast: \"Mark Winteringham\", \"Cookie-Policy\", \"Privacy-Policy\", and \"Admin panel\" all render as #0d6efd (Bootstrap link blue) on #212529 (dark footer background) — contrast ratio 3.42:1 against the required 4.5:1.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[0] (color-contrast, 4 nodes)"
+        ],
+        "questionOrRisk": "Affects users with low vision. The Cookie-Policy and Privacy-Policy links may carry legal significance; their inaccessibility could compound a compliance concern."
+      },
+      {
+        "observation": "The three social-media icon buttons (Facebook, Instagram, Twitter) in the footer are `<a href=\"#\">` tags containing only a Bootstrap icon `<i>` element with no visible text, no `aria-label`, no `title`, and no other accessible name. The axe scanner flags all three as serious `link-name` violations.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Purpose"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[2] (link-name, 3 nodes)",
+          "dom-snapshot.html (footer social links)"
+        ],
+        "questionOrRisk": "Screen-reader users encounter three meaningless unlabelled links. Additionally, all three use `href=\"#\"` so they navigate nowhere — a double failure of purpose and accessibility."
+      },
+      {
+        "observation": "The footer \"Quick Links\" column lists Home, Rooms, Booking, and Contact — all pointing to `href=\"#\"`. Unlike the main nav's anchor hrefs (e.g. `/#rooms`), these links are true dead stubs that scroll to the page top on every click.",
+        "heuristics": [
+          "Purpose",
+          "Familiarity"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html (footer Quick Links ul)"
+        ],
+        "questionOrRisk": "Users who click a footer quick link expect to jump to the relevant section; they instead stay at the top with no feedback. Comparable footers on comparable sites navigate correctly."
+      },
+      {
+        "observation": "The header nav includes Rooms, Booking, Amenities, Location, Contact, and Admin. The footer Quick Links include only Home, Rooms, Booking, and Contact — omitting Amenities, Location, and Admin, while adding Home. The two navigation surfaces are inconsistent with each other.",
+        "heuristics": [
+          "Familiarity",
+          "Comparable Products"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html (navbar vs footer ul)",
+          "text-content.txt lines 2–7 vs 88–91"
+        ],
+        "questionOrRisk": "Users anchoring their mental model from the footer will miss Location and Admin; users who expect the footer to mirror the nav will be confused by the discrepancy."
+      },
+      {
+        "observation": "All three room description paragraphs appear to be Lorem Ipsum placeholder content (\"Aenean porttitor mauris sit amet lacinia molestie…\", \"Vestibulum sollicitudin, lectus ac mollis consequat…\", \"Etiam metus metus, fringilla ac sagittis id…\"). No real room description is present for any room type.",
+        "heuristics": [
+          "Image",
+          "Claims"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "text-content.txt lines 23–24, 32–33, 41"
+        ],
+        "questionOrRisk": "Lorem Ipsum text signals an incomplete page to any visitor who reads the room details. It also means the claimed room features (TV, WiFi, Safe, Radio) are not contextualized by any real description."
+      },
+      {
+        "observation": "The contact phone number \"012345678901\" is 12 digits. UK landline and mobile numbers (including the leading 0) are 11 digits. This number is not a valid UK phone format.",
+        "heuristics": [
+          "World",
+          "Claims"
+        ],
+        "severity": "low",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "text-content.txt line 60"
+        ],
+        "questionOrRisk": "Likely intentional placeholder data for a demo environment, but worth flagging as a factual/World inconsistency. If this reaches production, no customer can call the number."
+      }
+    ],
+    "openQuestions": [
+      "Does the 'Amenities' section exist on a separate page, or was it planned but never built — and if the latter, has the nav item been intentionally left as a stub?",
+      "The 'Check Availability' and 'Submit' buttons are both type=\"button\" (not type=\"submit\") — is there JS wired to handle submission, and if so does it actually fire a network request? The form validation probe showed an error indicator appears on empty submit, which suggests JS is present, but the probe did not capture what API call (if any) backs it.",
+      "The social-media footer links all use href=\"#\" — are real social profiles planned, or are these permanent placeholders?",
+      "The contact textarea has id=\"description\" but the label says for=\"message\" — which side is the typo (should the `id` be `message`, or the `for` be `description`)?"
+    ]
+  },
+  {
+    "page": "http://localhost/admin",
+    "narrative": "The admin login page is conspicuously off-brand: the navbar and page title identify the site as \"Restful Booker Platform Demo\" rather than \"Shady Meadows B&B,\" and the navigation structure bears no resemblance to every other page in the product. A \"Logout\" button is surfaced before the user has authenticated, which is logically confusing and also fails WCAG AA color contrast. The login form has no client-side validation, fires a server request on empty submission, and returns only a visual error indicator with no explanatory text.",
+    "findings": [
+      {
+        "observation": "The navbar brand reads 'Restful Booker Platform Demo' and the page <title> reads 'Restful-booker-platform demo' — an entirely different product name. The navigation items are ['Restful Booker Platform Demo', 'Front Page'] versus the golden reference's ['Shady Meadows B&B', 'Rooms', 'Booking', 'Amenities', 'Location', 'Contact', 'Admin']. No Shady Meadows branding, logo, or colour palette is present.",
+        "questionOrRisk": "Is this the wrong application entirely being served at /admin, or has the admin shell template accidentally inherited a different product's layout?",
+        "heuristics": [
+          "Image",
+          "Familiarity",
+          "Comparable Products"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/admin/screenshot-full.png",
+          "pages/admin/dom-snapshot.html — <a class=\"navbar-brand\" href=\"/\">Restful Booker Platform Demo</a>",
+          "manifest navDeviationsFromGolden"
+        ]
+      },
+      {
+        "observation": "A 'Logout' button is rendered in the navbar on the unauthenticated login page. The user has not yet signed in, so offering a logout action is logically incoherent and will confuse anyone who wonders whether they are already in a session.",
+        "questionOrRisk": "Does the Logout button actually do anything from this state, and could it mislead a user into thinking they were previously logged in when they were not?",
+        "heuristics": [
+          "Explainability",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/admin/screenshot-full.png — Logout button visible in top-right nav",
+          "pages/admin/dom-snapshot.html — <button class=\"btn btn-outline-danger my-2 my-sm-0\">Logout</button>"
+        ]
+      },
+      {
+        "observation": "The Logout button fails WCAG 2 AA minimum contrast: foreground #dc3545 on background #212529 produces a contrast ratio of 3.4:1, against the required 4.5:1 for normal-weight 16px text.",
+        "questionOrRisk": "Users with low vision or colour deficiency cannot reliably read the Logout label, and the site is non-compliant with WCAG 2.1 SC 1.4.3.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "manifest accessibilityViolations — id: color-contrast, impact: serious, node: .btn-outline-danger"
+        ]
+      },
+      {
+        "observation": "Submitting the login form empty fires a network request to the server (networkRequestFiredOnEmptySubmit: true). There is no client-side validation preventing this, so the server is the only guard. An error indicator is shown afterward, but errorTextOnEmptySubmit is null — meaning the feedback is purely visual with no descriptive message to tell the user what went wrong or what is required.",
+        "questionOrRisk": "A screen-reader user or anyone unable to perceive the visual indicator receives no feedback at all. Additionally, the absence of a description forces the user to guess whether the problem was empty fields, wrong credentials, or a server error.",
+        "heuristics": [
+          "Explainability",
+          "User Expectations",
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "manifest formValidationFindings — networkRequestFiredOnEmptySubmit: true, errorIndicatorShown: true, errorTextOnEmptySubmit: null"
+        ]
+      },
+      {
+        "observation": "The primary Login button has border-radius 6px (vs golden 8px) and padding 6px 12px (vs golden 8px 16px). The button is visually slightly smaller and squarer than the canonical button style established on the Home page.",
+        "questionOrRisk": "Minor visual inconsistency; not critical, but the admin shell appears to use a stock Bootstrap button without applying the site's custom button token.",
+        "heuristics": [
+          "Comparable Products",
+          "Image"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "manifest visualDeviationsFromGolden — primary-button-radius-drift (6px vs 8px), primary-button-padding-drift (6px 12px vs 8px 16px)"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Is the 'Restful Booker Platform Demo' branding intentional (i.e. this is a known third-party admin shell) or is it a deployment misconfiguration where the wrong application is serving at /admin?",
+      "Does the Logout button perform any action when clicked from the unauthenticated state, or is it a no-op / navigation dead-end?",
+      "What does the error state actually look like after an empty or wrong-credential submission — is there any text at all, or only a red border on the fields?",
+      "After a successful login, does the admin area switch to Shady Meadows branding and navigation, or does it remain in the 'Restful Booker Platform Demo' shell throughout?"
+    ]
+  },
+  {
+    "page": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+    "narrative": "The reservation detail page never rendered any content — the screenshot shows only a Bootstrap loading spinner centred on a blank white page, and the extracted text is empty. The manifest confirms one console error, one page error, and one bad response, indicating an API call for reservation ID 1 failed. No error state, no fallback UI, and no timeout recovery are present; a user who landed here (e.g. after booking) would see an indefinite spinner with no way forward.",
+    "findings": [
+      {
+        "observation": "The page is stuck in a permanent loading state. The only DOM content is a Bootstrap spinner-border div; no reservation data, headings, or interactive elements ever rendered. The manifest records 1 console error, 1 page error, and 1 bad response, confirming the upstream data fetch failed. The user has no indication of what went wrong and no path to recover.",
+        "heuristics": [
+          "Purpose",
+          "Explainability",
+          "User Expectations",
+          "CRUD-Read"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "questionOrRisk": "The reservation detail page is completely non-functional: a failed API call produces a permanent spinner instead of any content or error state. Users who arrive here (e.g. from a booking confirmation link) are silently blocked with no recourse.",
+        "evidenceRefs": [
+          "screenshot-full.png (spinner only, blank page)",
+          "dom-snapshot.html (spinner-border div, no reservation content)",
+          "manifest: consoleErrorCount=1, pageErrorCount=1, badResponseCount=1",
+          "text-content.txt (empty)"
+        ]
+      },
+      {
+        "observation": "When the data fetch fails there is no error message, no retry button, and no timeout. The spinner runs indefinitely. Users cannot tell whether the page is still loading, their reservation doesn't exist, or the service is down.",
+        "heuristics": [
+          "Explainability",
+          "User Expectations",
+          "Comparable Products"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "questionOrRisk": "Absence of any error or empty-state UI means the failure mode is completely silent to the user. Industry-standard practice is to surface a meaningful message ('We couldn't load your reservation — please try again or contact support') and a recovery action.",
+        "evidenceRefs": [
+          "screenshot-full.png",
+          "dom-snapshot.html"
+        ]
+      },
+      {
+        "observation": "The Bootstrap spinner uses `<span class=\"visually-hidden\"></span>` with no inner text. The Bootstrap documentation requires this span to contain a text label (e.g. 'Loading...') so screen readers can announce the loading state. An empty span provides no accessible name.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "Screen-reader users receive no indication that the page is loading, making the application inaccessible during (and, if the spinner never clears, permanently) this state.",
+        "evidenceRefs": [
+          "dom-snapshot.html: <span class=\"visually-hidden\"></span>"
+        ]
+      },
+      {
+        "observation": "The page <title> is 'Restful-booker-platform demo' — a generic developer/demo label. A reservation detail page would typically carry a user-meaningful title such as 'Reservation #1 — Shady Meadows B&B' to support browser history, tab identification, and screen-reader page announcements.",
+        "heuristics": [
+          "Image",
+          "User Expectations"
+        ],
+        "severity": "low",
+        "confidence": "medium",
+        "questionOrRisk": "The generic title undermines brand professionalism and makes the tab/history entry uninformative, but is secondary to the page failing to load at all.",
+        "evidenceRefs": [
+          "dom-snapshot.html: <title>Restful-booker-platform demo</title>"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "What API endpoint does the reservation page call, and what error does it return for reservation ID 1 with these dates? (The bad response could be a 404, 500, or CORS failure — each has a different fix.)",
+      "Is the spinner timeout intentionally unbounded, or is there a race condition / missing error-boundary in the Next.js client component?",
+      "Does the same blank-spinner failure occur for other reservation IDs or date combinations, or is this specific to ID 1 / these dates?",
+      "Is there an error boundary or not-found route configured in Next.js that should have caught this — and if so, why did it not trigger?"
+    ]
+  },
+  {
+    "page": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+    "narrative": "This reservation detail page (room 2, 2026-09-05 → 2026-09-06) never rendered any content: the screenshot shows only a Bootstrap spinner against a blank white page, and the extracted text file is completely empty. The manifest confirms one console error, one page error, and one bad API response, all of which point to a failed data fetch that the UI never recovered from. The user is left staring at an infinite spinner with no explanation, no retry affordance, and no way forward — the page's entire purpose is blocked.",
+    "findings": [
+      {
+        "observation": "The page is completely non-functional: the React component never exits its loading state. The screenshot shows only a Bootstrap spinner; the text-content file is empty; headings and footer are absent. The manifest records one console error, one page error, and one bad API response — all consistent with a failed data fetch for reservation ID 2 that left the component hanging indefinitely.",
+        "questionOrRisk": "Any user navigating to this reservation URL sees an infinite spinner with no content, no error message, and no path to recovery — the page's primary purpose (displaying reservation details) is completely blocked.",
+        "heuristics": [
+          "Explainability",
+          "Purpose",
+          "CRUD-Read"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "screenshot-full.png (spinner only)",
+          "text-content.txt (empty)",
+          "manifest: consoleErrorCount=1, pageErrorCount=1, badResponseCount=1, headings=[]"
+        ]
+      },
+      {
+        "observation": "When the data fetch fails, the UI offers no error message, no retry button, and no fallback content whatsoever — only the perpetual spinner. The user cannot distinguish between a temporary network hiccup, a non-existent reservation ID, an authorization problem, or a server outage.",
+        "questionOrRisk": "Silent failure violates Explainability: users cannot determine what went wrong or what to do next. A standard web convention (Familiarity) is to show an error state with a meaningful message and a recovery action (e.g. 'We couldn't load this reservation — go back to My Bookings').",
+        "heuristics": [
+          "Explainability",
+          "Familiarity",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "screenshot-full.png (no error UI present)",
+          "dom-snapshot.html (root-container contains only spinner markup, no error branch rendered)"
+        ]
+      },
+      {
+        "observation": "The Bootstrap spinner markup is `<div class=\"spinner-border\" role=\"status\"><span class=\"visually-hidden\"></span></div>`. The visually-hidden span is empty. Bootstrap's own documented pattern requires `<span class=\"visually-hidden\">Loading...</span>` so that screen readers announce the loading state. An empty span paired with `role=\"status\"` results in a live region that announces nothing.",
+        "questionOrRisk": "Screen reader users receive no indication that the page is loading — a WCAG 4.1.3 (Status Messages) concern. The automated scanner returned zero violations, likely because it checked a technically valid role attribute rather than the missing text node inside it.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html: <span class=\"visually-hidden\"></span> (empty)"
+        ]
+      },
+      {
+        "observation": "The page `<title>` is 'Restful-booker-platform demo'. The word 'demo' appears in the browser tab, bookmarks, and any search-engine snippet. This is inconsistent with a production-quality booking experience and undermines brand credibility.",
+        "questionOrRisk": "Even if a user bookmarks or shares this URL, the tab title broadcasts that this is a demo system — a brand-image problem (Image heuristic) and a credibility signal that conflicts with professional presentation.",
+        "heuristics": [
+          "Image",
+          "Claims"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html: <title>Restful-booker-platform demo</title>"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Does reservation ID 2 exist in the database? The bad response could be a legitimate 404 (record not found), a server error, or a CORS/auth problem — the specific HTTP status and response body from the failed request would clarify root cause.",
+      "Is this failure reproducible for all reservation IDs, or specific to ID 2? Testing /reservation/1 and /reservation/3 would reveal whether the route itself is broken or only this record.",
+      "Does the application have any error boundary defined at the reservation route level? The DOM shows no rendered error UI, suggesting either there is no error boundary or the error occurred before hydration could trigger one.",
+      "Were the checkin/checkout query parameters expected to drive the data fetch, or are they purely informational? If the API call uses them to filter and they produce an impossible or conflicting range, that could explain the bad response.",
+      "The page title references 'Restful-booker-platform demo' while the charter describes 'WidgetWorks' — is this page from a different application than the one chartered, and if so, should it be in scope for this session?"
+    ]
+  },
+  {
+    "page": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+    "narrative": "This page is dead on arrival: the only rendered content is a Bootstrap loading spinner — no navigation, no headings, no reservation details, and no user-facing error message. The manifest confirms the cause: one bad API response, one console error, and one page error recorded during capture. The page title is the application's generic default (\"Restful-booker-platform demo\") rather than anything contextual. Separately, the URL pattern — `/reservation/3` with check-in/check-out query parameters — belongs to a hotel booking system (the Restful Booker / Shady Meadows demo), which sits entirely outside the WidgetWorks widget-catalog charter scope; this page appears to have been reached via direct navigation rather than from any in-app link.",
+    "findings": [
+      {
+        "observation": "Page never renders its content: the screenshot shows only a Bootstrap spinner, extracted text is empty, and the manifest records 1 bad API response, 1 console error, and 1 page error. The reservation detail for ID=3 could not be fetched, but the application silently spins rather than surfacing an error state.",
+        "heuristics": [
+          "Purpose",
+          "Explainability",
+          "CRUD-Read"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "screenshot-full.png (spinner only, blank body)",
+          "manifest: consoleErrorCount=1, pageErrorCount=1, badResponseCount=1",
+          "text-content.txt (empty)"
+        ],
+        "questionOrRisk": "The CRUD-Read operation for reservation 3 fails and the application has no visible error recovery path — users are left with an indefinite spinner and no explanation of what went wrong or what to do next."
+      },
+      {
+        "observation": "No error message, fallback state, or recovery path is shown when the data load fails. A user landing here — whether by direct link or back-navigation — has no indication whether the reservation doesn't exist, the server is down, or the URL is wrong. There is no retry control, no 'go back' prompt, and no explanation.",
+        "heuristics": [
+          "Explainability",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "screenshot-full.png (spinner is entire visible UI)",
+          "dom-snapshot.html (no error branch rendered)"
+        ],
+        "questionOrRisk": "Does the application have any error-boundary or fallback UI for failed reservation fetches, or is an endless spinner the only possible outcome of a bad response?"
+      },
+      {
+        "observation": "The Bootstrap spinner uses `role=\"status\"` (correct) but its inner `<span class=\"visually-hidden\"></span>` is empty. Bootstrap's own documentation requires text such as 'Loading…' inside this span to give screen-reader users an announcement. Without it, a screen reader user lands on a blank page with no feedback that anything is happening.",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "dom-snapshot.html: <div class=\"spinner-border\" role=\"status\"><span class=\"visually-hidden\"></span></div>"
+        ],
+        "questionOrRisk": "All loading spinners in the application should be audited for the same omission — this is likely a copy-paste pattern applied everywhere."
+      },
+      {
+        "observation": "The page `<title>` is 'Restful-booker-platform demo' — the application's global default, unchanged for this route. A browser tab, bookmark, or screen-reader page summary conveys nothing about the reservation being viewed. Good practice for a detail page is a title that includes the record identity (e.g. 'Reservation #3 | Shady Meadows').",
+        "heuristics": [
+          "Image",
+          "Explainability"
+        ],
+        "severity": "low",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "dom-snapshot.html: <title>Restful-booker-platform demo</title>",
+          "manifest: title = 'Restful-booker-platform demo'"
+        ],
+        "questionOrRisk": "Is the page title intentionally generic for this demo, or is dynamic title-setting per route simply not implemented?"
+      },
+      {
+        "observation": "The URL pattern `/reservation/3?checkin=2026-09-05&checkout=2026-09-06` with check-in/check-out parameters belongs to a hotel-booking system (Restful Booker / Shady Meadows), not a widget inventory catalog. This page type has no counterpart in the WidgetWorks charter scope (Home, Catalog, Item detail, New item, Edit item, Account, Contact, About). The manifest confirms it was reached via direct navigation, not an in-app link — suggesting it was injected into the session rather than discovered organically.",
+        "heuristics": [
+          "Purpose"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "evidenceRefs": [
+          "manifest: reachedVia='direct-nav'",
+          "manifest: otherUrlsSharingThisTemplate=[]",
+          "dom-snapshot.html: title and meta description reference Restful-booker-platform"
+        ],
+        "questionOrRisk": "Is this run (shadymeadows-full-1) actually targeting the Restful Booker application rather than WidgetWorks? If so, the charter and product description provided to the session are mismatched and findings should be re-evaluated against the correct product oracle."
+      }
+    ],
+    "openQuestions": [
+      "What API endpoint returned the bad response — does reservation ID 3 not exist in the seed data, or is the backend service unavailable?",
+      "Is the run 'shadymeadows-full-1' targeting the Restful Booker / Shady Meadows application rather than WidgetWorks? The URL pattern, page title, and run name all point to a hotel booking system, not a widget catalog.",
+      "Does the application have any error-boundary or fallback UI for failed reservation API calls, or is an endless spinner the only outcome?",
+      "Are all loading spinners across the application missing the required accessible label text inside their visually-hidden span, or is this isolated to this route?",
+      "Can `/reservation/3` be reached from any in-app link, or is it only accessible by direct URL? If no in-app path reaches it, the page may be a dead route."
+    ]
+  },
+  {
+    "page": "http://localhost/cookie",
+    "narrative": "The Cookie Policy page renders within the standard Shady Meadows B&B shell but its main content body refers to a completely different product (\"Automation in Testing Online\"), which is the underlying restful-booker-platform — not the Shady Meadows brand. The page adopts a passive consent model (\"by continuing to use our site you agree…\") with no visible cookie-consent mechanism, raising compliance concerns. Shared footer components carry two confirmed WCAG AA accessibility violations that affect every page.",
+    "findings": [
+      {
+        "observation": "The cookie policy body text repeatedly names 'Automation in Testing Online' as the data controller (e.g., 'How does Automation in Testing Online use cookies?') rather than Shady Meadows B&B. The legal/policy document references the wrong product and company throughout.",
+        "heuristics": [
+          "Claims",
+          "Image"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "questionOrRisk": "Users reading the Cookie Policy are given the name of a completely different product as the party responsible for their data. In a real deployment this would be legally misleading and damaging to brand trust.",
+        "evidenceRefs": [
+          "pages/cookie/screenshot-full.png — visible heading 'How does Automation in Testing Online use cookies?'"
+        ]
+      },
+      {
+        "observation": "The cookie policy banner text reads 'BY CONTINUING TO USE OUR SITE AND SERVICES, YOU ARE AGREEING TO THE USE OF COOKIES…' — a passive implied-consent model. There is no cookie consent banner, preference centre, or opt-out mechanism anywhere in the captured evidence.",
+        "heuristics": [
+          "Statutes/Standards",
+          "User Expectations"
+        ],
+        "severity": "medium",
+        "confidence": "medium",
+        "questionOrRisk": "GDPR and the ePrivacy Directive require freely given, specific, informed, and unambiguous consent before setting non-essential cookies — passive consent by continued use does not satisfy that standard. Users also have no way to withdraw or manage consent.",
+        "evidenceRefs": [
+          "pages/cookie/screenshot-full.png — uppercase intro paragraph",
+          "pages/cookie/dom-snapshot.html — no consent banner or preference UI present"
+        ]
+      },
+      {
+        "observation": "Four footer links (author attribution 'Mark Winteringham', 'Cookie-Policy', 'Privacy-Policy', 'Admin panel') fail WCAG 2 AA minimum contrast: foreground #0d6efd on background #212529 yields a ratio of 3.42:1 against the required 4.5:1 for normal-weight 14px text.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Image"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "Links in the footer are harder to read for users with low vision or colour-vision deficiencies; this is a confirmed WCAG 1.4.3 (Level AA) violation.",
+        "evidenceRefs": [
+          "accessibilityViolations[0] — color-contrast, 4 nodes"
+        ]
+      },
+      {
+        "observation": "The three footer social-media icon buttons (Facebook, Instagram, Twitter) are keyboard-focusable but have no accessible name — no visible text, no aria-label, no title attribute. Screen-reader users cannot determine their purpose.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Explainability"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "questionOrRisk": "Violates WCAG 2.4.4 Link Purpose (Level A) and 4.1.2 Name, Role, Value (Level A). A screen-reader user will encounter three anonymous focusable elements with no indication of where they lead.",
+        "evidenceRefs": [
+          "accessibilityViolations[1] — link-name, 3 nodes (.btn-outline-light:nth-child(1/2/3))"
+        ]
+      },
+      {
+        "observation": "All three social-media icon buttons link to href='#' — they are visible affordances that do nothing. A user clicking Facebook, Instagram, or Twitter will simply scroll to the top of the page.",
+        "heuristics": [
+          "Purpose",
+          "User Expectations"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "questionOrRisk": "Placeholder links that appear functional mislead users; if social media accounts don't exist yet the buttons should be omitted rather than dead-linked.",
+        "evidenceRefs": [
+          "pages/cookie/dom-snapshot.html — footer social link hrefs all '#'"
+        ]
+      },
+      {
+        "observation": "The page <title> is 'Restful-booker-platform demo' — the underlying platform's generic name. It does not identify the page as the Cookie Policy or associate it with the Shady Meadows B&B brand.",
+        "heuristics": [
+          "Image",
+          "Familiarity"
+        ],
+        "severity": "low",
+        "confidence": "high",
+        "questionOrRisk": "Poor for SEO, screen-reader context, and browser tab identification; a user with multiple tabs open cannot distinguish this tab from any other page on the site.",
+        "evidenceRefs": [
+          "manifest — title: 'Restful-booker-platform demo'",
+          "pages/cookie/dom-snapshot.html — <title>"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Which cookies does Shady Meadows B&B actually set — are they all essential/session, or are analytics/third-party cookies present that would trigger GDPR consent requirements?",
+      "Is 'Automation in Testing Online' placeholder text intentionally left from the test platform, or does a corrected, Shady Meadows-branded policy exist but fail to load?",
+      "Do the social media icon links on other pages (home, about, contact) also dead-link to '#', or is this isolated to the footer of the cookie page?",
+      "The footer copyright reads '© 2019-26' — is this intentional shorthand for 2019–2026, or a typo for '© 2026'?"
+    ]
+  },
+  {
+    "page": "http://localhost/privacy",
+    "narrative": "The `/privacy` route presents a genuine structural puzzle: the DOM snapshot and extracted headings reflect the full homepage template (hero, booking, rooms, location, contact), yet the full-page screenshot shows only privacy policy content — strongly suggesting the policy is injected client-side after initial render, effectively an overlay atop the homepage shell. More critically, the policy text itself contains legally significant errors: it names the wrong website URL (\"automationintesting.online\") and the wrong data controller (\"MW Test Consultancy\"), misdefines GDPR, and frames data collection as serving \"our testing\" priorities — all indicators of a boilerplate template never customised for Shady Meadows B&B. Accessibility failures in the footer (contrast and nameless social-link icons) are confirmed by the automated scanner and carry over from the site-wide layout.",
+    "findings": [
+      {
+        "observation": "The privacy policy body explicitly names a different website ('https://automationintesting.online') and a different data controller ('MW Test Consultancy, 7 Sheridan Close, Norwich, Norfolk, NR8 6RW') as the subject of the policy. This is the Shady Meadows B&B site; the policy has never been customised away from its boilerplate origin.",
+        "heuristics": [
+          "Claims",
+          "World"
+        ],
+        "severity": "high",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/privacy/screenshot-full.png — first paragraph of Privacy Policy Notice"
+        ]
+      },
+      {
+        "observation": "The policy defines 'GDPR means General Data Protection Act.' GDPR stands for General Data Protection Regulation; the Data Protection Act 2018 is the separate UK statute. Conflating them in a legal document is a factual error.",
+        "heuristics": [
+          "World",
+          "Claims"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/privacy/screenshot-full.png — Policy key definitions bullet list"
+        ]
+      },
+      {
+        "observation": "The 'Device and Connection Information' section states data is collected 'to assist us with prioritising our testing.' In a public-facing privacy policy for a B&B, this reveals the underlying test-platform's purpose, is misleading to users, and undermines brand credibility.",
+        "heuristics": [
+          "Claims",
+          "Image"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/privacy/screenshot-full.png — Device And Connection Information section"
+        ]
+      },
+      {
+        "observation": "The <title> element site-wide is 'Restful-booker-platform demo'. On a legal page a user may bookmark or share, the title should identify the document (e.g., 'Privacy Policy | Shady Meadows B&B'). The generic platform title breaks user expectations and hides the page identity from screen readers on load.",
+        "heuristics": [
+          "User Expectations",
+          "Image",
+          "Explainability"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "pages/privacy/dom-snapshot.html — <title>Restful-booker-platform demo</title>"
+        ]
+      },
+      {
+        "observation": "The heading scanner extracted only homepage headings with no 'Privacy Policy Notice' heading present, even though the screenshot shows that heading prominently. The privacy content appears injected by client-side JavaScript after initial render, meaning the heading is absent from the static document outline and may not be announced correctly to screen readers on page load.",
+        "heuristics": [
+          "Statutes/Standards",
+          "Explainability"
+        ],
+        "severity": "medium",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "manifest headings array — no privacy heading present",
+          "pages/privacy/screenshot-full.png — 'Privacy Policy Notice' visible at top"
+        ]
+      },
+      {
+        "observation": "Four footer links (Mark Winteringham, Cookie-Policy, Privacy-Policy, Admin panel) have a measured contrast ratio of 3.42:1 (#0d6efd on #212529, 14 px normal weight), below the WCAG AA minimum of 4.5:1. Confirmed automated violation (color-contrast, wcag143).",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[0] — color-contrast nodes in footer <small>"
+        ]
+      },
+      {
+        "observation": "The footer's Facebook, Instagram, and Twitter icon links have no accessible text — no visible label, aria-label, or title attribute. Screen readers cannot determine the destination or purpose of these links. Confirmed WCAG 2.4.4 and 4.1.2 violation (link-name).",
+        "heuristics": [
+          "Statutes/Standards"
+        ],
+        "severity": "medium",
+        "confidence": "high",
+        "evidenceRefs": [
+          "accessibilityViolations[1] — link-name nodes targeting .btn-outline-light social icon anchors"
+        ]
+      },
+      {
+        "observation": "The privacy route's DOM and text extraction reflect the full homepage template (hero, booking widget, rooms grid, map, contact form) with privacy policy content appearing only in the screenshot — not in the extracted headings or text. If JavaScript is disabled, users see only the homepage and no privacy policy whatsoever.",
+        "heuristics": [
+          "Purpose",
+          "User Expectations"
+        ],
+        "severity": "high",
+        "confidence": "medium",
+        "evidenceRefs": [
+          "pages/privacy/text-content.txt — only homepage content",
+          "manifest headings — all homepage headings only",
+          "pages/privacy/screenshot-full.png — only privacy content visible"
+        ]
+      }
+    ],
+    "openQuestions": [
+      "Does the privacy policy content render inside a client-side modal/overlay? If so, is there a close/dismiss mechanism and does keyboard focus management work correctly for screen reader users?",
+      "Is the phone number 012345678901 (12 digits) a typo? UK numbers are 11 digits.",
+      "The policy claims the site is exempt from ICO registration — is that accurate given the site collects contact-form submissions, booking data, and device telemetry?",
+      "The social media icon links all point to '#' (no real destination). Are these intentional placeholders, and why are they present on a live-facing page without at minimum an aria-label?"
+    ]
+  }
+]

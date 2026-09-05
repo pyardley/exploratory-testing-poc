@@ -1,0 +1,13 @@
+{
+  "runId": "shadymeadows-full-1",
+  "baseUrl": "http://localhost",
+  "goldenUrl": "http://localhost/",
+  "scannedAt": "2026-09-05T13:18:06.987Z",
+  "pagesScanned": 7,
+  "totalBrokenLinks": 0,
+  "totalBrokenAssets": 0,
+  "totalConsoleErrors": 3,
+  "totalAccessibilityViolations": 8,
+  "totalVisualDeviations": 2,
+  "crudSmokeRan": true
+}

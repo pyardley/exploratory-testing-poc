@@ -1,0 +1,16 @@
+{
+  "forms": [
+    {
+      "formId": "form-0",
+      "submittedEmpty": true,
+      "networkRequestFiredOnEmptySubmit": true,
+      "errorIndicatorShown": true,
+      "errorTextOnEmptySubmit": null,
+      "numericFieldProbed": null,
+      "errorTextOnInvalidType": null,
+      "networkRequestFiredOnInvalidType": null,
+      "sameErrorTextAcrossScenarios": null
+    }
+  ],
+  "cancelButtonProbes": []
+}

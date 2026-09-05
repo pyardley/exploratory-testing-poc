@@ -1,0 +1,18 @@
+{
+  "nav": [
+    {
+      "label": "Restful Booker Platform Demo",
+      "href": "/"
+    },
+    {
+      "label": "Front Page",
+      "href": "/"
+    }
+  ],
+  "deviationsFromGolden": [
+    {
+      "type": "nav-mismatch",
+      "description": "Navigation items/order ([\"Restful Booker Platform Demo\",\"Front Page\"]) differ from the golden reference ([\"Shady Meadows B&B\",\"Rooms\",\"Booking\",\"Amenities\",\"Location\",\"Contact\",\"Admin\"])."
+    }
+  ]
+}

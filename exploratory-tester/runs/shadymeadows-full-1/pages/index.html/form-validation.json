@@ -1,0 +1,27 @@
+{
+  "forms": [
+    {
+      "formId": "form-0",
+      "submittedEmpty": false,
+      "networkRequestFiredOnEmptySubmit": false,
+      "errorIndicatorShown": true,
+      "errorTextOnEmptySubmit": null,
+      "numericFieldProbed": null,
+      "errorTextOnInvalidType": null,
+      "networkRequestFiredOnInvalidType": null,
+      "sameErrorTextAcrossScenarios": null
+    },
+    {
+      "formId": "form-1",
+      "submittedEmpty": false,
+      "networkRequestFiredOnEmptySubmit": false,
+      "errorIndicatorShown": true,
+      "errorTextOnEmptySubmit": null,
+      "numericFieldProbed": null,
+      "errorTextOnInvalidType": null,
+      "networkRequestFiredOnInvalidType": null,
+      "sameErrorTextAcrossScenarios": null
+    }
+  ],
+  "cancelButtonProbes": []
+}

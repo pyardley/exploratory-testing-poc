@@ -1,0 +1,12 @@
+{
+  "failedRequests": [],
+  "badResponses": [
+    {
+      "url": "http://localhost/api/room/3",
+      "status": 500
+    }
+  ],
+  "pageErrors": [
+    "Unexpected token 'I', \"Internal S\"... is not valid JSON"
+  ]
+}

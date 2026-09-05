@@ -71,11 +71,81 @@ cd ../regression && npm install && npx playwright install chromium && npm test
 
 Steps 2–4 are also automated as a single command: `npm run demo` (starts the app, runs the tester, scores it, then stops the app).
 
-**Pointing this at a login-gated or client-side-routed site:** add `--login-url <url> --login-username <user> --login-password <pass>` for sites that require a real form-submit login (not just a session cookie), and/or `--storage-state <path.json>` for sites where a pre-captured cookie/localStorage session is enough on its own. The crawler also auto-falls-back to click-path reconstruction for pages that only exist via client-side routing (`history.pushState`, `href="#"` + `onClick`) rather than a real, independently-navigable URL — all three of these were added after pointing the tool at Sauce Demo (`saucedemo.com`) broke it three different ways; see `FINDINGS.md` §9 for the full story and what it found once it worked.
+**Pointing this at a login-gated or client-side-routed site:** add `--login-url <url> --login-username <user> --login-password <pass>` for sites that require a real form-submit login (not just a session cookie), and/or `--storage-state <path.json>` for sites where a pre-captured cookie/localStorage session is enough on its own. The crawler also auto-falls-back to click-path reconstruction for pages that only exist via client-side routing (`history.pushState`, `href="#"` + `onClick`) rather than a real, independently-navigable URL — all three of these were added after pointing the tool at Sauce Demo (`saucedemo.com`) broke it three different ways; see `FINDINGS.md` §9 for the full story and what it found once it worked. A second external target, Shady Meadows B&B (a self-hosted Docker Compose app, `external-validation/shadymeadows/`), needed none of these — a useful contrast showing the plain direct-navigation path still works cleanly on a third, unrelated site; see `FINDINGS.md` §10 for what it found instead, including a booking-flow defect traced to a confirmed root cause in the target's own source.
 
-**Windows/Git Bash note:** if invoking `node bin/cli.js ... --golden-path /index.html` from Git Bash, prefix the command with `MSYS_NO_PATHCONV=1` — otherwise Git Bash silently rewrites the leading-slash argument into a local filesystem path before Node ever sees it (a classic MSYS path-mangling gotcha), which sends the golden-reference navigation to a dead local file path and hangs.
+**Windows/Git Bash note:** if invoking `node bin/cli.js ... --golden-path /index.html` from Git Bash, prefix the command with `MSYS_NO_PATHCONV=1` — otherwise Git Bash silently rewrites the leading-slash argument into a local filesystem path before Node ever sees it (a classic MSYS path-mangling gotcha), which sends the golden-reference navigation to a dead local file path and hangs. The same gotcha bites any other command invoked from Git Bash with a leading-slash argument (for example `docker run ... -w /workspace ...`) — same fix.
 
 exploratory-tester performs real state-mutating actions (it creates/edits/deletes real records as part of its CRUD smoke flow) — only point it at a test/staging environment, or pass `--read-only` to skip that flow. Reset the test app's data with `npm run app:reset-db` (workspace: `test-app`) between runs if you want a clean baseline.
+
+### Mode 1: Deterministic + AI interpretation (the default pipeline)
+
+This is what `bin/cli.js` runs, and what steps 1–5 above walk through: fixed Playwright scanners capture a static evidence bundle per page (screenshots, DOM, console/network logs, an axe-core accessibility scan, extracted text, plus scripted interaction probes and a CRUD smoke flow), then `claude -p` reviews that fixed bundle with no live browsing capability at all — see "Design notes" below for why. This is the default because it's fast, cheap (~$0.50/run), and deterministic scan output doesn't vary run to run.
+
+```bash
+npm install                # once
+npm run app:start          # terminal 1 — http://localhost:4173
+
+# terminal 2
+cd exploratory-tester
+node bin/cli.js \
+  --url http://localhost:4173 \
+  --checklist ../checklist/few-hiccupss-crud-checklist.md \
+  --charter ../charter/exploratory-charter.md \
+  --app-desc ../app-spec/test-app-description.md \
+  --golden-path /index.html \
+  --run-id my-run-1
+# → exploratory-tester/runs/my-run-1/session-notes.md
+
+cd ../comparison
+node src/compare.js --run-dir ../exploratory-tester/runs/my-run-1
+# add --runs 3 for a multi-run majority-vote score instead of a single-pass adjudication
+# → comparison/reports/<timestamp>-comparison-report.md
+```
+
+Flags specific to this mode:
+
+| Flag | Purpose |
+|---|---|
+| `--url` *(required)* | Base URL of the site to test. |
+| `--checklist` / `--charter` / `--app-desc` *(required)* | Paths to the three input MDs (must not resolve under `answer-key/`). |
+| `--golden-path` | Path (relative to `--url`) of the visual/brand reference page. Default `/`. |
+| `--run-id` | Output directory name under `runs/`. Default: a timestamp. |
+| `--model` | Model for the `claude -p` review calls. Default `sonnet`. |
+| `--max-budget-usd` | Hard spend cap for the AI phase. Default `0.50`. |
+| `--skip-ai` | Deterministic scanners only, no `claude -p` calls — useful for a fast sanity check or CI. |
+| `--read-only` | Skip the CRUD smoke flow (no create/edit/delete against the target). |
+| `--login-url` / `--login-username` / `--login-password` | Real form-submit login bootstrap, for sites where a cookie alone doesn't establish a session. |
+| `--storage-state` | Path to a pre-captured Playwright `storageState` JSON, for sites where that's sufficient on its own. |
+
+### Mode 2: Playwright MCP + heavy AI usage (experimental agentic mode)
+
+This is what `bin/agentic-cli.js` runs — a live agentic-browsing mode using the real `@playwright/mcp` server, so the model drives an actual browser via `browser_navigate`/`browser_click`/`browser_snapshot`/etc. tool calls instead of reviewing a fixed evidence bundle. It exists to answer "what if the AI just explored like a human tester, tools and all?" as a genuine empirical comparison against Mode 1, not as a replacement for it — see `FINDINGS.md` §8 for the full cost/reliability/complementarity results (57% recall vs. 71% for Mode 1 after its fixes, ~$3.04 vs. ~$0.50, ~23 minutes vs. a few minutes, on the same WidgetWorks target).
+
+Unlike Mode 1, this mode doesn't crawl pages — it runs 6 fixed, bounded tasks (`home-and-about`, `catalog-interactions`, `create-widget-edge-cases`, `edit-widget-twice`, `account-and-contact`, `delete-widget`), each its own `claude -p` call with a live, isolated, headless `@playwright/mcp` browser session scoped to the target origin.
+
+```bash
+npm install                # once — @playwright/mcp is fetched automatically via npx when the run starts
+npm run app:start          # terminal 1 — http://localhost:4173
+
+# terminal 2
+cd exploratory-tester
+node bin/agentic-cli.js \
+  --url http://localhost:4173 \
+  --checklist ../checklist/few-hiccupss-crud-checklist.md \
+  --charter ../charter/exploratory-charter.md \
+  --app-desc ../app-spec/test-app-description.md \
+  --run-id my-agentic-run-1
+# → exploratory-tester/runs/my-agentic-run-1/session-notes.md
+# → exploratory-tester/runs/my-agentic-run-1/agentic-results.json (per-task cost/turns/duration)
+
+cd ../comparison
+node src/compare.js --run-dir ../exploratory-tester/runs/my-agentic-run-1
+# → comparison/reports/<timestamp>-comparison-report.md
+```
+
+Accepts the same `--model`/`--max-budget-usd`/`--run-id`/`--golden-path` flags as Mode 1 (`--max-budget-usd` here is a per-task cap, applied across all 6 tasks, so budget for several times the single-run figure). `comparison/` scores an agentic run exactly the same way as a Mode 1 run — it only ever reads `session-notes.md` and the structured findings, not which mode produced them.
+
+**Before trying Mode 2 against a new target:** confirm `npx @playwright/mcp@0.0.80 --version` resolves (first run downloads it), and expect meaningfully higher cost/runtime and lower, less consistent recall than Mode 1 — per `FINDINGS.md` §8, its main value in this PoC was catching a handful of findings Mode 1's static bundle genuinely couldn't (things that only surface via live interaction sequencing), not replacing the default pipeline.
 
 ## Design notes
 

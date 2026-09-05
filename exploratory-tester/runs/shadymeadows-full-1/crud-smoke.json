@@ -1,0 +1,45 @@
+{
+  "steps": [
+    {
+      "step": "create",
+      "formUrl": "http://localhost",
+      "tagValue": "AAA-PROBE-1788613973887",
+      "navigatedTo": "http://localhost/"
+    },
+    {
+      "step": "read-after-create",
+      "listUrl": "http://localhost",
+      "foundOnListPage": false
+    },
+    {
+      "step": "update-0",
+      "itemUrl": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+      "skipped": true,
+      "reason": "no edit link found from this item's detail page"
+    },
+    {
+      "step": "update-1",
+      "itemUrl": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+      "skipped": true,
+      "reason": "no edit link found from this item's detail page"
+    },
+    {
+      "step": "update-2",
+      "itemUrl": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+      "skipped": true,
+      "reason": "no edit link found from this item's detail page"
+    },
+    {
+      "step": "read-beyond-page-1",
+      "attempted": false,
+      "reached": false,
+      "reason": "no Next-like control found"
+    },
+    {
+      "step": "delete",
+      "skipped": true,
+      "reason": "could not find a second item to test deletion on"
+    }
+  ],
+  "dialogMessages": []
+}

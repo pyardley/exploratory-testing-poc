@@ -1,0 +1,33 @@
+{
+  "nav": [
+    {
+      "label": "Shady Meadows B&B",
+      "href": "/"
+    },
+    {
+      "label": "Rooms",
+      "href": "/#rooms"
+    },
+    {
+      "label": "Booking",
+      "href": "/#booking"
+    },
+    {
+      "label": "Amenities",
+      "href": "/#amenities"
+    },
+    {
+      "label": "Location",
+      "href": "/#location"
+    },
+    {
+      "label": "Contact",
+      "href": "/#contact"
+    },
+    {
+      "label": "Admin",
+      "href": "/admin"
+    }
+  ],
+  "deviationsFromGolden": []
+}

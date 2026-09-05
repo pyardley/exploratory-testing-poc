@@ -1,0 +1,7 @@
+Restful Booker Platform Demo
+Front Page
+Logout
+Login
+Username
+Password
+Login

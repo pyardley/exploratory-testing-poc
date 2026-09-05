@@ -1,0 +1,181 @@
+{
+  "pages": [
+    {
+      "url": "http://localhost",
+      "actualUrl": "http://localhost/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": []
+    },
+    {
+      "url": "http://localhost/",
+      "actualUrl": "http://localhost/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/admin",
+      "actualUrl": "http://localhost/admin",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/admin\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/1?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/2?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/3?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/cookie",
+      "actualUrl": "http://localhost/cookie",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/cookie\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/privacy",
+      "actualUrl": "http://localhost/privacy",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/privacy\"]"
+      ]
+    }
+  ],
+  "allVisited": [
+    {
+      "url": "http://localhost",
+      "actualUrl": "http://localhost/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": []
+    },
+    {
+      "url": "http://localhost/",
+      "actualUrl": "http://localhost/",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/admin",
+      "actualUrl": "http://localhost/admin",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/admin\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/1?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/1?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/2?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/2?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+      "actualUrl": "http://localhost/reservation/3?checkin=2026-09-05&checkout=2026-09-06",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/reservation/3?checkin=2026-09-05&checkout=2026-09-06\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/cookie",
+      "actualUrl": "http://localhost/cookie",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/cookie\"]"
+      ]
+    },
+    {
+      "url": "http://localhost/privacy",
+      "actualUrl": "http://localhost/privacy",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "reachedVia": "direct-nav",
+      "rootUrl": "http://localhost",
+      "clickPath": [
+        "a[href=\"/privacy\"]"
+      ]
+    }
+  ],
+  "brokenLinks": [],
+  "brokenAssets": [],
+  "spaRoutedPages": []
+}
