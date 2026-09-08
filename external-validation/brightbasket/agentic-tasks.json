@@ -1,0 +1,30 @@
+[
+  {
+    "id": "home-and-about",
+    "description": "Explore the Home page and the About page. Read all visible marketing claims, statistics, and historical/founding claims closely — check whether dates and any numbers make sense and are internally consistent within and across the two pages. Look closely at the logo and any images on both pages for visual quality issues (distortion, wrong proportions, broken images). Note the overall visual identity (colors, type, spacing) on the Home page specifically, since it's meant to be the brand reference every other page should match."
+  },
+  {
+    "id": "shop-search-filter-sort",
+    "description": "On the Shop page: type a real search term into the search box and see whether the results actually change to match it. Try the category filter and the 'In stock only' checkbox, alone and combined with a search term. Open the sort control and try each of its options (Name A-Z, Price Low to High, Price High to Low), noting the resulting order each time and whether it matches what the label promises. Try the pagination controls (Next/Previous) if there's more than one page, and check whether the visible items and the page status actually change."
+  },
+  {
+    "id": "product-detail-and-add-to-basket",
+    "description": "Open at least two different product detail pages, including one that looks low on stock if you can find one from the Shop grid. On each, check that the price, stock, and description shown match what the Shop page showed for the same product. Try adding the product to the basket with different quantities, including trying to add more than the currently available stock. Report exactly what happens (accepted, rejected with a specific message, or silently capped) and whether the basket icon/badge updates to match."
+  },
+  {
+    "id": "basket-lifecycle-and-discounts",
+    "description": "With at least one item in the basket, go to the Basket page. Change a line's quantity and check the subtotal updates correctly. Try applying each of these discount codes one at a time, checking the resulting totals and any message shown each time: WELCOME10, SAVE20, VIP25, SUMMER15 (this one is described elsewhere as expired), and one clearly invalid made-up code. Check that applying a second code replaces rather than stacks with the first. Remove an item from the basket and confirm it's actually gone and the totals update. Check whether delivery is charged and how it's calculated relative to the subtotal shown."
+  },
+  {
+    "id": "checkout-delivery-and-payment-edge-cases",
+    "description": "Proceed to Checkout with items in the basket. On the Delivery details step, enter deliberately awkward but realistic values: a name with an apostrophe or hyphen (e.g. \"Siobhan O'Brien-Clarke\"), a single-digit house number in the address, and a UK mobile number with a leading zero (e.g. 07911 123456). Continue to the Payment step, then go back to re-edit the delivery details and confirm your values were preserved rather than reset. On the Payment step, try a valid-looking Visa number (4111 1111 1111 1111), then try an American Express-length (15-digit) number and a Mastercard/Visa-length (16-digit) number, and compare what the page's own hint text claims is required against what actually gets accepted or rejected for each."
+  },
+  {
+    "id": "place-order-and-verify-confirmation",
+    "description": "Complete a full checkout end-to-end with valid delivery and payment details and place the order. On the Confirmation page, note every specific detail shown: item names/quantities/prices, any discount applied, delivery charge, total, delivery address, and order reference. Then go to Order History, find this same order (it should be the newest), open its Order Detail page, and compare every one of those same details against what the Confirmation page showed. Report any mismatch between the two views of the same order precisely, quoting both values."
+  },
+  {
+    "id": "contact-and-faq-claims",
+    "description": "On the Contact page, read each FAQ answer closely (delivery charge policy, accepted payment cards and their digit counts, order-changes policy, how long the company has been trading). Cross-check each of these claims against what you actually observed elsewhere in the site during this session (the delivery charge you saw calculated, the card lengths actually accepted or rejected, the About page's own founding/history claim). Then submit the contact form with a real name, email, and message, and report exactly what feedback (if any) confirms whether the submission succeeded."
+  }
+]

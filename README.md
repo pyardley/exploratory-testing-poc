@@ -117,6 +117,8 @@ Flags specific to this mode:
 | `--login-url` / `--login-username` / `--login-password` | Real form-submit login bootstrap, for sites where a cookie alone doesn't establish a session. |
 | `--storage-state` | Path to a pre-captured Playwright `storageState` JSON, for sites where that's sufficient on its own. |
 
+Also runs a **checkout/wizard-flow walkthrough** (`src/scanners/checkoutWalkthrough.js`) before the crawl, for sites where the primary conversion flow (e.g. a checkout) advances via a JS `window.location` redirect after a form submit rather than any real `<a href>` — those pages are structurally invisible to `crawler.js`'s link/click-based discovery no matter how good it gets. Uses the same generic accessible-name-matching discipline as `crudSmoke.js`; no-ops harmlessly on a site with no such flow. Added after pointing this tool at BrightBasket (`external-validation/brightbasket/`) revealed its entire checkout — the single highest-value flow in the app — was never being evidenced at all; see `FINDINGS.md` §14 for the full story and what it found once fixed.
+
 ### Mode 2: Playwright MCP + heavy AI usage (experimental agentic mode)
 
 This is what `bin/agentic-cli.js` runs — a live agentic-browsing mode using the real `@playwright/mcp` server, so the model drives an actual browser via `browser_navigate`/`browser_click`/`browser_snapshot`/etc. tool calls instead of reviewing a fixed evidence bundle. It exists to answer "what if the AI just explored like a human tester, tools and all?" as a genuine empirical comparison against Mode 1, not as a replacement for it — see `FINDINGS.md` §8 for the full cost/reliability/complementarity results (57% recall vs. 71% for Mode 1 after its fixes, ~$3.04 vs. ~$0.50, ~23 minutes vs. a few minutes, on the same WidgetWorks target).
@@ -143,7 +145,9 @@ node src/compare.js --run-dir ../exploratory-tester/runs/my-agentic-run-1
 # → comparison/reports/<timestamp>-comparison-report.md
 ```
 
-Accepts the same `--model`/`--max-budget-usd`/`--run-id`/`--golden-path` flags as Mode 1 (`--max-budget-usd` here is a per-task cap, applied across all 6 tasks, so budget for several times the single-run figure). `comparison/` scores an agentic run exactly the same way as a Mode 1 run — it only ever reads `session-notes.md` and the structured findings, not which mode produced them.
+Accepts the same `--model`/`--max-budget-usd`/`--run-id`/`--golden-path` flags as Mode 1 (`--max-budget-usd` here is a per-task cap, applied across all 6 tasks, so budget for several times the single-run figure — and raise it further for broader custom tasks than WidgetWorks' own; BrightBasket's 7 tasks needed `1.50` instead of the `0.50` default, see `FINDINGS.md` §14). `comparison/` scores an agentic run exactly the same way as a Mode 1 run — it only ever reads `session-notes.md` and the structured findings, not which mode produced them.
+
+The 6 built-in tasks are WidgetWorks-shaped by name. Pass `--tasks-file <path.json>` (a `{id, description}[]` array) to run a different task set against a different target instead — falls back to the built-in list when omitted, so every prior agentic result stays reproducible unchanged. `external-validation/brightbasket/agentic-tasks.json` is a worked example.
 
 **Before trying Mode 2 against a new target:** confirm `npx @playwright/mcp@0.0.80 --version` resolves (first run downloads it), and expect meaningfully higher cost/runtime and lower, less consistent recall than Mode 1 — per `FINDINGS.md` §8, its main value in this PoC was catching a handful of findings Mode 1's static bundle genuinely couldn't (things that only surface via live interaction sequencing), not replacing the default pipeline.
 

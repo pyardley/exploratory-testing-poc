@@ -87,5 +87,11 @@ export function loadConfig(argv = process.argv.slice(2)) {
     loginUrl: args["login-url"] || null,
     loginUsername: args["login-username"] || null,
     loginPassword: args["login-password"] || null,
+    // Agentic-mode only: optional path to a JSON array of {id, description}
+    // task definitions, for pointing bin/agentic-cli.js at a site whose pages
+    // and flows don't match the built-in WidgetWorks-shaped default tasks.
+    // Falls back to the built-in tasks (runAgenticSession.js) when omitted,
+    // preserving reproducibility of prior agentic runs.
+    tasksFile: args["tasks-file"] ? path.resolve(args["tasks-file"]) : null,
   };
 }

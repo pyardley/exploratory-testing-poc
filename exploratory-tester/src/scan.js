@@ -11,6 +11,7 @@ import { runFormValidationProbe } from "./scanners/formValidation.js";
 import { extractContent } from "./scanners/contentExtractor.js";
 import { runCrudSmoke } from "./scanners/crudSmoke.js";
 import { runInteractionProbe, probeCheckboxRoundTrip } from "./scanners/interactionProbe.js";
+import { runCheckoutWalkthrough } from "./scanners/checkoutWalkthrough.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -83,6 +84,89 @@ async function performLoginBootstrap(context, { loginUrl, loginUsername, loginPa
   return { page, landedUrl: page.url() };
 }
 
+/**
+ * Captures the full standard evidence bundle for one page — screenshot, DOM,
+ * console/network, a11y, visual/nav facts vs. golden, form-validation probe,
+ * interaction probe — and writes it into the bundle, exactly what the main
+ * crawl loop below does per crawled page. Extracted so a page reached by some
+ * OTHER means than link-crawling (see checkoutWalkthrough.js) gets identical,
+ * first-class evidence rather than being invisible to the AI review phase.
+ * Assumes `page` is already sitting on the URL to capture — positioning it
+ * there (via goto or a click sequence) is the caller's responsibility.
+ */
+async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia = "direct-nav" }, { bundle, config, goldenVisualFacts, goldenNav }) {
+  const slug = slugForUrl(config.baseUrl, url);
+  const capture = attachConsoleNetworkCapture(page);
+
+  const [screenshot, domSnapshot, visualFacts, nav, content, a11y] = await Promise.all([
+    page.screenshot({ fullPage: true, caret: "initial" }).catch(() => null),
+    page.content().catch(() => null),
+    extractVisualFacts(page).catch(() => null),
+    extractNav(page).catch(() => null),
+    extractContent(page).catch(() => null),
+    runAccessibilityScan(page).catch((err) => ({ error: String(err.message || err) })),
+  ]);
+
+  const formProbe = await runFormValidationProbe(page).catch((err) => ({ error: String(err.message || err) }));
+
+  let interactionProbe = { directionalControls: [], searchProbes: [], paginationProbes: [] };
+  let checkboxRoundTrip = [];
+  if (!config.readOnly) {
+    interactionProbe = await runInteractionProbe(page, url).catch((err) => ({ error: String(err.message || err) }));
+    checkboxRoundTrip = await probeCheckboxRoundTrip(page, url).catch((err) => [{ error: String(err.message || err) }]);
+  }
+
+  const consoleNetworkResults = capture.getResults();
+  // goldenVisualFacts/goldenNav are null when this is called before the golden
+  // reference pass has run yet (the checkout-walkthrough bootstrap, below,
+  // runs before the crawl so a real order exists for the crawler to discover
+  // — earlier than golden facts are normally extracted). Skip the diff rather
+  // than crash; those two pages just carry no visual/nav deviation data.
+  const visualDeviations = visualFacts && goldenVisualFacts ? compareToGolden(visualFacts, goldenVisualFacts) : [];
+  const navDeviations = nav && goldenNav ? compareNavToGolden(nav, goldenNav) : [];
+
+  if (screenshot) bundle.writePageFile(slug, "screenshot-full.png", screenshot);
+  if (domSnapshot) bundle.writePageFile(slug, "dom-snapshot.html", domSnapshot);
+  if (content) bundle.writePageFile(slug, "text-content.txt", content.bodyText);
+  bundle.writePageJson(slug, "console.json", consoleNetworkResults.consoleMessages);
+  bundle.writePageJson(slug, "network.json", { failedRequests: consoleNetworkResults.failedRequests, badResponses: consoleNetworkResults.badResponses, pageErrors: consoleNetworkResults.pageErrors });
+  bundle.writePageJson(slug, "accessibility.json", a11y);
+  bundle.writePageJson(slug, "visual-facts.json", { facts: visualFacts, deviationsFromGolden: visualDeviations });
+  bundle.writePageJson(slug, "nav.json", { nav, deviationsFromGolden: navDeviations });
+  bundle.writePageJson(slug, "form-validation.json", formProbe);
+  bundle.writePageJson(slug, "interaction-probe.json", { ...interactionProbe, checkboxRoundTrip });
+
+  const manifest = {
+    url,
+    slug,
+    reachedVia,
+    otherUrlsSharingThisTemplate: variantUrls.filter((u) => u !== url),
+    title: content?.title || null,
+    navError: null,
+    headings: content?.headings || [],
+    badgeLikeText: content?.badgeLike || [],
+    footerText: content?.footerText || null,
+    consoleErrorCount: consoleNetworkResults.consoleMessages.filter((m) => m.type === "error").length,
+    consoleWarningCount: consoleNetworkResults.consoleMessages.filter((m) => m.type === "warning").length,
+    pageErrorCount: consoleNetworkResults.pageErrors.length,
+    badResponseCount: consoleNetworkResults.badResponses.length,
+    failedRequestCount: consoleNetworkResults.failedRequests.length,
+    accessibilityViolationCount: Array.isArray(a11y.violations) ? a11y.violations.length : null,
+    accessibilityViolations: a11y.violations || [],
+    visualDeviationsFromGolden: visualDeviations,
+    navDeviationsFromGolden: navDeviations,
+    formValidationFindings: formProbe,
+    interactionProbeFindings: { ...interactionProbe, checkboxRoundTrip },
+    evidenceFiles: {
+      screenshot: `pages/${slug}/screenshot-full.png`,
+      domSnapshot: `pages/${slug}/dom-snapshot.html`,
+      textContent: `pages/${slug}/text-content.txt`,
+    },
+  };
+  bundle.writePageJson(slug, "manifest.json", manifest);
+  return manifest;
+}
+
 export async function runScan(config) {
   const runDir = path.join(__dirname, "..", "runs", config.runId);
   const bundle = new EvidenceBundle(runDir);
@@ -103,6 +187,27 @@ export async function runScan(config) {
     crawlStartUrl = loginResult.landedUrl;
     loginPage = loginResult.page;
     console.log(`[scan] login landed on ${crawlStartUrl}, crawling from there`);
+  }
+
+  // Runs BEFORE the crawl (not just before evidence capture) so that anything
+  // it creates server-side — an order, a non-empty basket — is already in
+  // place by the time the crawler runs its own discovery pass. Concretely:
+  // orders.html has no <a href> to any order-detail page until an order
+  // actually exists, so the crawler could never discover order-detail.html on
+  // its own on a fresh install. Pages this walkthrough visits directly that
+  // still aren't independently link-discoverable (e.g. a payment step reached
+  // only via form-submit, never a real href) get evidence captured right here
+  // instead. Golden facts don't exist yet at this point in a fresh run — see
+  // the null-golden guard in capturePageEvidence above.
+  let checkoutWalkthroughResult = { steps: [], reachedPages: [] };
+  if (!config.readOnly) {
+    console.log(`[scan] running checkout/wizard-flow walkthrough (this mutates state on the target site) ...`);
+    const walkthroughPage = await context.newPage();
+    checkoutWalkthroughResult = await runCheckoutWalkthrough(walkthroughPage, config.baseUrl, {
+      capturePageEvidence: (page, record) => capturePageEvidence(page, record, { bundle, config, goldenVisualFacts: null, goldenNav: null }),
+    }).catch((err) => ({ steps: [{ step: "walkthrough", failed: true, reason: String(err.message || err) }], reachedPages: [] }));
+    await walkthroughPage.close();
+    bundle.writeJson("checkout-walkthrough.json", checkoutWalkthroughResult);
   }
 
   console.log(`[scan] crawling from ${crawlStartUrl} ...`);
@@ -136,11 +241,9 @@ export async function runScan(config) {
   console.log(`[scan] ${crawlResult.pages.length} URLs crawled, deduped to ${dedupedPages.length} distinct templates for the evidence/AI pass`);
 
   for (const pageRecord of dedupedPages) {
-    const { url, variantUrls } = pageRecord;
-    const slug = slugForUrl(config.baseUrl, url);
+    const { url } = pageRecord;
     console.log(`[scan] page: ${url}${pageRecord.reachedVia === "client-side-navigation" ? " (SPA-routed, reached via click-path replay)" : ""}`);
     const page = await context.newPage();
-    const capture = attachConsoleNetworkCapture(page);
 
     let navError = null;
     try {
@@ -149,83 +252,21 @@ export async function runScan(config) {
       navError = String(err.message || err);
     }
 
-    // Read-only measurements run concurrently against a pristine page. formValidation
-    // is NOT included here — it clicks/submits/mutates the DOM, and running it
-    // concurrently with axe/screenshot/content extraction produced non-deterministic
-    // races (e.g. axe scanning mid form-clear). It runs afterward, alone, on purpose.
-    // caret: 'initial' disables Playwright's default caret-hiding behavior for
-    // screenshots, which otherwise injects a transient `caret-color: transparent
-    // !important` style into every text input for the duration of the capture.
-    // Running that concurrently with page.content() below caught this mid-mutation
-    // and captured it as if it were real production markup — a phantom finding
-    // the AI review treated as a serious, systemic, cross-page bug.
-    const [screenshot, domSnapshot, visualFacts, nav, content, a11y] = await Promise.all([
-      page.screenshot({ fullPage: true, caret: "initial" }).catch(() => null),
-      page.content().catch(() => null),
-      extractVisualFacts(page).catch(() => null),
-      extractNav(page).catch(() => null),
-      extractContent(page).catch(() => null),
-      runAccessibilityScan(page).catch((err) => ({ error: String(err.message || err) })),
-    ]);
-
-    const formProbe = await runFormValidationProbe(page).catch((err) => ({ error: String(err.message || err) }));
-
-    // Interaction probing runs after evidence capture (it clicks/types/mutates
-    // the page) and after formValidation (both mutate, so keep them sequential
-    // and off the golden-page pass — golden has none of these controls).
-    let interactionProbe = { directionalControls: [], searchProbes: [], paginationProbes: [] };
-    let checkboxRoundTrip = [];
-    if (!config.readOnly) {
-      interactionProbe = await runInteractionProbe(page, url).catch((err) => ({ error: String(err.message || err) }));
-      checkboxRoundTrip = await probeCheckboxRoundTrip(page, url).catch((err) => [{ error: String(err.message || err) }]);
-    }
-
-    const consoleNetworkResults = capture.getResults();
-    const visualDeviations = visualFacts ? compareToGolden(visualFacts, goldenVisualFacts) : [];
-    const navDeviations = nav ? compareNavToGolden(nav, goldenNav) : [];
-
-    if (screenshot) bundle.writePageFile(slug, "screenshot-full.png", screenshot);
-    if (domSnapshot) bundle.writePageFile(slug, "dom-snapshot.html", domSnapshot);
-    if (content) bundle.writePageFile(slug, "text-content.txt", content.bodyText);
-    bundle.writePageJson(slug, "console.json", consoleNetworkResults.consoleMessages);
-    bundle.writePageJson(slug, "network.json", { failedRequests: consoleNetworkResults.failedRequests, badResponses: consoleNetworkResults.badResponses, pageErrors: consoleNetworkResults.pageErrors });
-    bundle.writePageJson(slug, "accessibility.json", a11y);
-    bundle.writePageJson(slug, "visual-facts.json", { facts: visualFacts, deviationsFromGolden: visualDeviations });
-    bundle.writePageJson(slug, "nav.json", { nav, deviationsFromGolden: navDeviations });
-    bundle.writePageJson(slug, "form-validation.json", formProbe);
-    bundle.writePageJson(slug, "interaction-probe.json", { ...interactionProbe, checkboxRoundTrip });
-
-    const manifest = {
-      url,
-      slug,
-      reachedVia: pageRecord.reachedVia || "direct-nav",
-      otherUrlsSharingThisTemplate: variantUrls.filter((u) => u !== url),
-      title: content?.title || null,
-      navError,
-      headings: content?.headings || [],
-      badgeLikeText: content?.badgeLike || [],
-      footerText: content?.footerText || null,
-      consoleErrorCount: consoleNetworkResults.consoleMessages.filter((m) => m.type === "error").length,
-      consoleWarningCount: consoleNetworkResults.consoleMessages.filter((m) => m.type === "warning").length,
-      pageErrorCount: consoleNetworkResults.pageErrors.length,
-      badResponseCount: consoleNetworkResults.badResponses.length,
-      failedRequestCount: consoleNetworkResults.failedRequests.length,
-      accessibilityViolationCount: Array.isArray(a11y.violations) ? a11y.violations.length : null,
-      accessibilityViolations: a11y.violations || [],
-      visualDeviationsFromGolden: visualDeviations,
-      navDeviationsFromGolden: navDeviations,
-      formValidationFindings: formProbe,
-      interactionProbeFindings: { ...interactionProbe, checkboxRoundTrip },
-      evidenceFiles: {
-        screenshot: `pages/${slug}/screenshot-full.png`,
-        domSnapshot: `pages/${slug}/dom-snapshot.html`,
-        textContent: `pages/${slug}/text-content.txt`,
-      },
-    };
-    bundle.writePageJson(slug, "manifest.json", manifest);
+    const manifest = await capturePageEvidence(
+      page,
+      { url, variantUrls: pageRecord.variantUrls, reachedVia: pageRecord.reachedVia || "direct-nav" },
+      { bundle, config, goldenVisualFacts, goldenNav }
+    );
+    manifest.navError = navError;
+    bundle.writePageJson(manifest.slug, "manifest.json", manifest); // re-write with the real navError now known
     pageSummaries.push(manifest);
 
     await page.close();
+  }
+
+  for (const manifest of checkoutWalkthroughResult.reachedPages || []) {
+    console.log(`[scan] page: ${manifest.url} (reached via checkout-walkthrough, not link-crawlable)`);
+    pageSummaries.push(manifest);
   }
 
   let crudSmokeResult = null;

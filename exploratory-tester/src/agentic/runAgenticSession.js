@@ -24,9 +24,12 @@ function resolveGitBashPath() {
   return null;
 }
 
-// Areas to explore, deliberately phrased around checklist-style activities
-// (not fault IDs) — the agent must never be told what's actually wrong.
-const TASKS = [
+// Default areas to explore, deliberately phrased around checklist-style
+// activities (not fault IDs) — the agent must never be told what's actually
+// wrong. Shaped around WidgetWorks specifically; a site with different pages
+// should pass --tasks-file pointing at its own {id, description}[] JSON
+// instead of relying on this fallback (see config.js's tasksFile).
+const DEFAULT_TASKS = [
   {
     id: "home-and-about",
     description:
@@ -138,12 +141,16 @@ export async function runAgenticExperiment(config) {
   const promptTemplate = fs.readFileSync(path.join(__dirname, "prompts/agenticTask.md"), "utf-8");
   const schema = JSON.parse(fs.readFileSync(path.join(__dirname, "schemas/agenticTask.schema.json"), "utf-8"));
 
+  const tasks = config.tasksFile
+    ? JSON.parse(fs.readFileSync(config.tasksFile, "utf-8"))
+    : DEFAULT_TASKS;
+
   runOneTask.charter = fs.readFileSync(config.charterPath, "utf-8");
   runOneTask.appDescription = fs.readFileSync(config.appDescPath, "utf-8");
   runOneTask.checklist = fs.readFileSync(config.checklistPath, "utf-8");
 
   const results = [];
-  for (const task of TASKS) {
+  for (const task of tasks) {
     console.log(`[agentic] task: ${task.id} ...`);
     // eslint-disable-next-line no-await-in-loop
     const result = await runOneTask({
@@ -182,7 +189,7 @@ export async function runAgenticExperiment(config) {
         startedAt: new Date().toISOString(),
         totalCostUsd,
         totalWallClockMs,
-        tasksRun: TASKS.length,
+        tasksRun: tasks.length,
         tasksSucceeded: successCount,
       },
       null,
@@ -191,9 +198,9 @@ export async function runAgenticExperiment(config) {
   );
 
   const sessionNotesPath = path.join(runDir, "session-notes.md");
-  fs.writeFileSync(sessionNotesPath, renderSessionNotes(config, results, { totalCostUsd, totalWallClockMs, successCount }));
+  fs.writeFileSync(sessionNotesPath, renderSessionNotes(config, results, { totalCostUsd, totalWallClockMs, successCount, tasksRun: tasks.length }));
 
-  console.log(`[agentic] done. ${successCount}/${TASKS.length} tasks completed successfully. Total cost: $${totalCostUsd.toFixed(2)}. Total wall clock: ${(totalWallClockMs / 1000).toFixed(0)}s.`);
+  console.log(`[agentic] done. ${successCount}/${tasks.length} tasks completed successfully. Total cost: $${totalCostUsd.toFixed(2)}. Total wall clock: ${(totalWallClockMs / 1000).toFixed(0)}s.`);
   console.log(`[agentic] session notes: ${sessionNotesPath}`);
   return { runDir, results, totalCostUsd, totalWallClockMs, successCount };
 }
@@ -202,7 +209,7 @@ function renderSessionNotes(config, results, totals) {
   let md = `# Exploratory Test Session Notes — Agentic MCP Browsing (EXPERIMENTAL)\n\n`;
   md += `**Tester:** live \`claude -p\` session driving real Playwright MCP browser tools (model: ${config.model}), one call per task area — not the default static-artifact-review pipeline.\n`;
   md += `**Target:** ${config.baseUrl}\n`;
-  md += `**Tasks run:** ${TASKS.length}, succeeded: ${totals.successCount}\n`;
+  md += `**Tasks run:** ${totals.tasksRun}, succeeded: ${totals.successCount}\n`;
   md += `**Total cost:** $${totals.totalCostUsd.toFixed(2)}  \n**Total wall-clock time:** ${(totals.totalWallClockMs / 1000).toFixed(0)}s\n\n`;
 
   md += `## Findings\n\n`;
