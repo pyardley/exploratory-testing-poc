@@ -26,6 +26,15 @@
  * crawler can pick that page up for free afterward with zero extra code,
  * exactly as long as the list page itself uses a real `<a href>` (checked
  * against BrightBasket's orders.html, which does).
+ *
+ * Also runs three README "Recommendations for Further Improvement" checks
+ * grounded in the BrightBasket validation: an empty-basket-checkout attempt
+ * FIRST, before anything below ever adds an item (#5); a second, cheap order
+ * placed after the main flow to catch an order-count stat that's cached on
+ * first load and never updates within a session (#4); and structured
+ * `scaffoldingActions` tagging for any step taken purely to shape evidence for
+ * a later capture rather than because the checklist called for it, so the AI
+ * review prompt can discount observations that trace back to one (#6).
  */
 
 const DELIVERY_FIELDS_AWKWARD = [
@@ -91,8 +100,143 @@ function addToBasketButton(page) {
   return page.getByRole("button", { name: /^add to (basket|cart|bag)$/i }).first();
 }
 
+function basketLinkLocator(page) {
+  // Anchored to the START of the accessible name — see the comment further
+  // down where this same pattern is used for the main flow's basket link.
+  return page.getByRole("link", { name: /^\s*(basket|cart|bag)\b/i }).first();
+}
+
+function checkoutCtaLocator(page) {
+  return page.getByRole("link", { name: /checkout/i }).or(page.getByRole("button", { name: /checkout/i })).first();
+}
+
+/**
+ * Best-effort removal of every line item from the basket via any
+ * "remove"/"delete"-labeled control, bounded so a stuck/relabeled control
+ * can't loop forever. Used only to GUARANTEE the basket is actually empty
+ * before the empty-basket-checkout check below — without this, that check
+ * would silently pass on a coincidentally-empty basket (e.g. a fresh install)
+ * rather than a deliberately-verified one.
+ */
+async function clearBasket(page) {
+  const basketLink = basketLinkLocator(page);
+  if ((await basketLink.count().catch(() => 0)) === 0) return { reachedBasket: false };
+  await basketLink.click().catch(() => {});
+  await page.waitForLoadState("networkidle").catch(() => {});
+
+  const removeButtons = page.getByRole("button", { name: /remove|delete/i });
+  let itemsRemoved = 0;
+  for (let i = 0; i < 10; i += 1) {
+    const count = await removeButtons.count().catch(() => 0);
+    if (count === 0) break;
+    await removeButtons.first().click().catch(() => {});
+    await page.waitForTimeout(300);
+    itemsRemoved += 1;
+  }
+  return { reachedBasket: true, itemsRemoved };
+}
+
+/**
+ * Clears the basket, then tries to reach checkout anyway — checking whether
+ * anything actually blocks an empty-basket checkout attempt (README
+ * Recommendations Further Improvement #5). Deliberately runs FIRST, before
+ * anything below ever adds an item, and as a distinct, cheap sub-check ahead
+ * of the normal non-empty run — recovering U-01-shaped coverage without
+ * giving up the coverage the rest of this scanner exists for.
+ */
+async function checkEmptyBasketCheckoutPath(page, baseUrl) {
+  await page.goto(baseUrl, { waitUntil: "networkidle", timeout: 20000 }).catch(() => {});
+  const clear = await clearBasket(page);
+  if (!clear.reachedBasket) {
+    return { step: "empty-basket-checkout", skipped: true, reason: "no basket/cart-like nav link found" };
+  }
+
+  const checkoutCta = checkoutCtaLocator(page);
+  if ((await checkoutCta.count().catch(() => 0)) === 0) {
+    return {
+      step: "empty-basket-checkout",
+      itemsRemovedFirst: clear.itemsRemoved,
+      checkoutControlVisible: false,
+      blockedAsExpected: true,
+      reason: "no checkout control visible on an empty basket",
+    };
+  }
+
+  const advanced = await clickAndWaitForNavigation(page, checkoutCta);
+  return {
+    step: "empty-basket-checkout",
+    itemsRemovedFirst: clear.itemsRemoved,
+    checkoutControlVisible: true,
+    advancedPastBasketWithEmptyBasket: advanced,
+    urlAfter: page.url(),
+  };
+}
+
+/** Generic "orders placed"/order-count stat pattern, e.g. "3 orders", "Orders:
+ * 3", "You have placed 3 orders" — deliberately loose wording match rather
+ * than any one app's exact phrasing (README Recommendations Further
+ * Improvement #4). Returns null (no-op) on any app with no such stat visible
+ * from an account/profile/dashboard/orders-like nav link. */
+const ORDER_COUNT_PATTERN = /(\d+)\s+orders?\b|orders?\s*(?:placed)?:?\s*(\d+)/i;
+
+async function findOrderCountStat(page, baseUrl) {
+  await page.goto(baseUrl, { waitUntil: "networkidle", timeout: 20000 }).catch(() => {});
+  const accountLink = page.getByRole("link", { name: /account|profile|dashboard|orders/i }).first();
+  if ((await accountLink.count().catch(() => 0)) === 0) return null;
+  await accountLink.click().catch(() => {});
+  await page.waitForLoadState("networkidle").catch(() => {});
+  const bodyText = await page.locator("body").innerText().catch(() => "");
+  const match = ORDER_COUNT_PATTERN.exec(bodyText);
+  if (!match) return null;
+  return { url: page.url(), statText: match[0].trim(), count: parseInt(match[1] || match[2], 10) };
+}
+
+/**
+ * A trimmed-down repeat of the main flow below — safe delivery values only (no
+ * awkward-value retry), no evidence capture — purely to get a second real
+ * order placed server-side so findOrderCountStat can be compared before/after
+ * (README Recommendations Further Improvement #4: a stat cached on first load
+ * and never updated needs a SECOND order in the same session to even be
+ * observable; a single-order session can't distinguish that from "correct").
+ */
+async function placeQuickSecondOrder(page, baseUrl) {
+  await page.goto(baseUrl, { waitUntil: "networkidle", timeout: 20000 }).catch(() => {});
+  const shopLink = page.getByRole("link", { name: /^(shop|catalog|products|browse)/i }).first();
+  if ((await shopLink.count().catch(() => 0)) > 0) {
+    await shopLink.click().catch(() => {});
+    await page.waitForLoadState("networkidle").catch(() => {});
+  }
+  const addBtn = addToBasketButton(page);
+  if ((await addBtn.count().catch(() => 0)) === 0) return { placed: false, reason: "no enabled add-to-basket control found" };
+  await addBtn.click().catch(() => {});
+  await page.waitForTimeout(500);
+
+  const basketLink = basketLinkLocator(page);
+  if ((await basketLink.count().catch(() => 0)) === 0) return { placed: false, reason: "no basket/cart-like nav link found" };
+  await basketLink.click().catch(() => {});
+  await page.waitForLoadState("networkidle").catch(() => {});
+
+  const checkoutCta = checkoutCtaLocator(page);
+  if ((await checkoutCta.count().catch(() => 0)) === 0) return { placed: false, reason: "no checkout-like control found on basket page" };
+  if (!(await clickAndWaitForNavigation(page, checkoutCta))) return { placed: false, reason: "did not advance past basket" };
+
+  const continueBtn = page.getByRole("button", { name: /continue|next|proceed/i }).first();
+  if ((await continueBtn.count().catch(() => 0)) > 0) {
+    await fillFieldsByPattern(page, DELIVERY_FIELDS_SAFE);
+    if (!(await clickAndWaitForNavigation(page, continueBtn))) return { placed: false, reason: "did not advance past delivery form" };
+  }
+
+  const placeOrderBtn = page.getByRole("button", { name: /place order|pay now|submit order|confirm order|^pay$/i }).first();
+  if ((await placeOrderBtn.count().catch(() => 0)) === 0) return { placed: false, reason: "no place-order-like control found" };
+  await fillFieldsByPattern(page, PAYMENT_FIELDS);
+  const placed = await clickAndWaitForNavigation(page, placeOrderBtn);
+  return { placed };
+}
+
 export async function runCheckoutWalkthrough(page, baseUrl, { capturePageEvidence }) {
-  const result = { steps: [], reachedPages: [] };
+  const result = { steps: [], reachedPages: [], scaffoldingActions: [] };
+
+  result.steps.push(await checkEmptyBasketCheckoutPath(page, baseUrl));
 
   await page.goto(baseUrl, { waitUntil: "networkidle", timeout: 20000 }).catch(() => {});
 
@@ -218,6 +362,28 @@ export async function runCheckoutWalkthrough(page, baseUrl, { capturePageEvidenc
     result.steps.push({ step: "capture-confirmation-page", ok: true, url: confirmationManifest.url });
   }
 
+  // --- Second order + stale order-count-stat check (README Recommendations
+  // Further Improvement #4) ---
+  const orderCountBefore = await findOrderCountStat(page, baseUrl);
+  const secondOrder = await placeQuickSecondOrder(page, baseUrl);
+  const orderCountAfter = secondOrder.placed ? await findOrderCountStat(page, baseUrl) : orderCountBefore;
+  result.steps.push({
+    step: "second-order-stat-check",
+    secondOrderPlaced: secondOrder.placed,
+    reason: secondOrder.reason ?? null,
+    statFound: Boolean(orderCountBefore || orderCountAfter),
+    orderCountBefore: orderCountBefore?.statText ?? null,
+    orderCountAfter: orderCountAfter?.statText ?? null,
+    statAppearsStaleAfterSecondOrder:
+      secondOrder.placed && orderCountBefore && orderCountAfter ? orderCountBefore.count === orderCountAfter.count : null,
+  });
+  if (secondOrder.placed) {
+    result.scaffoldingActions.push(
+      "placed a second order (after the first) purely to test whether an order-count stat updates within the same session — " +
+        "this order is real server-side state, not a test artifact to disregard, but its purpose was verifying stat freshness, not exploring the checkout flow itself"
+    );
+  }
+
   // --- Leave the basket non-empty for the main crawl's own basket.html
   // capture: on BrightBasket (and plausibly similar apps) the empty-basket
   // view renders a materially different, much smaller DOM than the populated
@@ -236,6 +402,16 @@ export async function runCheckoutWalkthrough(page, baseUrl, { capturePageEvidenc
     await addBtnAgain.click().catch(() => {});
     await page.waitForTimeout(500);
     result.steps.push({ step: "leave-basket-non-empty", ok: true });
+    // README Recommendations Further Improvement #6: tag this so the AI review
+    // prompt can discount it rather than crediting it as evidence the basket
+    // "isn't cleared after checkout" — it's a second, unrelated item this
+    // scanner itself added moments later, purely to shape evidence for
+    // basket.html's own capture (see the comment above this block).
+    result.scaffoldingActions.push(
+      "added 1 unrelated item to the basket after order placement, purely so basket.html's own evidence capture " +
+        "(which runs after this scanner, as part of the normal crawl) sees a populated basket rather than an artificially-empty one — " +
+        "this item is not evidence of 'basket not cleared after checkout'"
+    );
   } else {
     result.steps.push({ step: "leave-basket-non-empty", skipped: true, reason: "no enabled add-to-basket control found on second pass" });
   }

@@ -65,17 +65,51 @@ export async function runAdjudication({ faultCatalogPath, runDir, model = "opus"
 
 const VERDICT_SCORE = { FOUND: 1, PARTIALLY_FOUND: 0.5, MISSED: 0 };
 
+// A "claude -p exited 1" with EMPTY stderr (claudeClient.js's error message
+// ends "exited 1: " with nothing after the colon) is the concurrent-spawn
+// flakiness this project's Windows/Git-Bash setup showed under Promise.all —
+// the exact same call run alone, sequentially, did not reproduce it (see
+// FINDINGS.md, README Recommendations Further Improvement #7). A genuine
+// failure (bad prompt, real claude error) carries stderr text and won't match.
+const BARE_EXIT_1_PATTERN = /exited 1:\s*$/;
+
+async function runAdjudicationWithRetry(opts, { retries = 2, backoffMs = [1000, 3000] } = {}) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await runAdjudication(opts);
+    } catch (err) {
+      const isBareExit1 = BARE_EXIT_1_PATTERN.test(String(err.message || "").trim());
+      if (!isBareExit1 || attempt >= retries) throw err;
+      console.warn(`[adjudicate] retrying after a bare "exited 1" failure (attempt ${attempt + 1}/${retries}) ...`);
+      await new Promise((resolve) => setTimeout(resolve, backoffMs[attempt] || backoffMs[backoffMs.length - 1]));
+    }
+  }
+}
+
 /**
- * Runs adjudication N times (in parallel — each is an independent LLM call)
- * and aggregates per-fault verdicts by mean score rather than strict majority,
- * so a 2-1 split still lands as PARTIALLY_FOUND rather than an arbitrary
- * tie-break. Exists because a single adjudication run has real variance —
- * see README.md Recommendations #5.
+ * Runs adjudication N times and aggregates per-fault verdicts by mean score
+ * rather than strict majority, so a 2-1 split still lands as PARTIALLY_FOUND
+ * rather than an arbitrary tie-break. Exists because a single adjudication run
+ * has real variance — see README.md Recommendations #5.
+ *
+ * On Windows, runs sequentially with retry-with-backoff instead of firing all
+ * N via Promise.all — the parallel spawns showed a materially higher bare-
+ * "exited 1" failure rate there than the identical call run alone (README
+ * Recommendations Further Improvement #7); this is a platform-detected
+ * fallback, not a behavior change for platforms where that flakiness wasn't
+ * observed, which keep the faster concurrent path.
  */
 export async function runMultipleAdjudications({ faultCatalogPath, runDir, model = "opus", maxBudgetUsd = "1.00", runs = 1 }) {
-  const attempts = await Promise.all(
-    Array.from({ length: runs }, () => runAdjudication({ faultCatalogPath, runDir, model, maxBudgetUsd }))
-  );
+  const adjudicationOpts = { faultCatalogPath, runDir, model, maxBudgetUsd };
+  let attempts;
+  if (process.platform === "win32") {
+    attempts = [];
+    for (let i = 0; i < runs; i += 1) {
+      attempts.push(await runAdjudicationWithRetry(adjudicationOpts));
+    }
+  } else {
+    attempts = await Promise.all(Array.from({ length: runs }, () => runAdjudicationWithRetry(adjudicationOpts)));
+  }
 
   const faultCatalog = attempts[0].faultCatalog;
   const perFaultVerdicts = new Map(faultCatalog.faults.map((f) => [f.id, []]));

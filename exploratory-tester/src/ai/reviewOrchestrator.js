@@ -49,6 +49,10 @@ export async function runAiReview(config, scanOutput) {
         TEXT_CONTENT_PATH: page.evidenceFiles.textContent,
         GOLDEN_URL: scanOutput.summary.goldenUrl,
         GOLDEN_FACTS_JSON: JSON.stringify(goldenVisualFacts, null, 2),
+        SCAFFOLDING_ACTIONS:
+          page.scaffoldingActionsThisSession && page.scaffoldingActionsThisSession.length > 0
+            ? page.scaffoldingActionsThisSession.map((a) => `- ${a}`).join("\n")
+            : "(none)",
       });
 
     try {

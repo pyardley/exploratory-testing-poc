@@ -19,4 +19,10 @@ For visual/brand comparisons, here are the extracted facts from the golden refer
 {{GOLDEN_FACTS_JSON}}
 ```
 
+Scaffolding actions taken this session, before this page was captured, purely to shape evidence for a later capture — not because the checklist called for them (also present in the manifest's own `scaffoldingActionsThisSession` field, called out here separately because it matters for how you weigh what you see):
+
+{{SCAFFOLDING_ACTIONS}}
+
+Do NOT cite anything traceable to one of these actions as evidence of organic user-facing behavior (e.g. a scaffolding-added basket item is not evidence the basket "isn't cleared after checkout") — note it only if it reveals a genuine separate defect in its own right.
+
 Respond with findings tagged to one or more of the FEW HICCUPSS + CRUD heuristics. For each finding, judge severity and your confidence honestly — a plausible-but-uncertain observation is still worth recording with lower confidence, but do not invent problems that aren't supported by the evidence. If this page looks clean, say so — an empty or near-empty findings list is a legitimate, useful result.

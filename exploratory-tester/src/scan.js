@@ -1,11 +1,12 @@
 import { chromium } from "playwright";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { EvidenceBundle, slugForUrl } from "./evidence/bundleBuilder.js";
 import { runCrawler, reachPage } from "./scanners/crawler.js";
 import { attachConsoleNetworkCapture } from "./scanners/consoleNetwork.js";
 import { runAccessibilityScan } from "./scanners/accessibility.js";
-import { extractVisualFacts, compareToGolden } from "./scanners/visualConsistency.js";
+import { extractVisualFacts, compareToGolden, imageAspectRatioDeviations } from "./scanners/visualConsistency.js";
 import { extractNav, compareNavToGolden } from "./scanners/navConsistency.js";
 import { runFormValidationProbe } from "./scanners/formValidation.js";
 import { extractContent } from "./scanners/contentExtractor.js";
@@ -23,6 +24,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * record the rest as variants for transparency. The crawler's own broken-link/
  * asset results (crawler-report.json) already cover every instance regardless.
  */
+/** A query string (e.g. ?id=w-001) or a numeric path segment is the generic
+ * signature of a "detail page for one specific record" URL, as opposed to a
+ * static template page that just happens to share a pathname with others. */
+function looksLikeDetailPageUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.search) return true;
+    return /\/\d+(?:[/?]|$)/.test(u.pathname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Same-template dedup as before, EXCEPT for detail/item-shaped pages (see
+ * looksLikeDetailPageUrl): those also keep a second distinct record so the
+ * evidence/AI pass samples two different item ids, not just whichever one the
+ * crawler happened to discover first. Exists because a fault reachable only
+ * via one specific record's id (e.g. a product detail page that always 500s)
+ * was otherwise structurally invisible whenever that record wasn't the first
+ * one found — the same shape as CRUD-03 in README Conclusion #4, generalized
+ * beyond the CRUD smoke flow to the evidence/AI pass itself (README
+ * Recommendations Further Improvement #4).
+ */
 function dedupePagesByPathname(pages) {
   const byPathname = new Map();
   for (const p of pages) {
@@ -33,12 +58,25 @@ function dedupePagesByPathname(pages) {
       key = p.url;
     }
     if (!byPathname.has(key)) {
-      byPathname.set(key, { ...p, variantUrls: [p.url] });
+      byPathname.set(key, { primary: { ...p, variantUrls: [p.url] }, extras: [] });
     } else {
-      byPathname.get(key).variantUrls.push(p.url);
+      const group = byPathname.get(key);
+      group.primary.variantUrls.push(p.url);
+      group.extras.push(p);
     }
   }
-  return Array.from(byPathname.values());
+
+  const result = [];
+  for (const group of byPathname.values()) {
+    result.push(group.primary);
+    if (group.extras.length > 0 && looksLikeDetailPageUrl(group.primary.url)) {
+      const second = group.extras.find((e) => e.url !== group.primary.url);
+      if (second) {
+        result.push({ ...second, variantUrls: [second.url], sampledAsSecondInstance: true });
+      }
+    }
+  }
+  return result;
 }
 
 /** Navigates to a crawled page for evidence capture, using click-path
@@ -94,7 +132,11 @@ async function performLoginBootstrap(context, { loginUrl, loginUsername, loginPa
  * Assumes `page` is already sitting on the URL to capture — positioning it
  * there (via goto or a click sequence) is the caller's responsibility.
  */
-async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia = "direct-nav" }, { bundle, config, goldenVisualFacts, goldenNav }) {
+async function capturePageEvidence(
+  page,
+  { url, variantUrls = [url], reachedVia = "direct-nav" },
+  { bundle, config, goldenVisualFacts, goldenNav, documentedDiscountCodes = [], scaffoldingActions = [] }
+) {
   const slug = slugForUrl(config.baseUrl, url);
   const capture = attachConsoleNetworkCapture(page);
 
@@ -109,10 +151,10 @@ async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia 
 
   const formProbe = await runFormValidationProbe(page).catch((err) => ({ error: String(err.message || err) }));
 
-  let interactionProbe = { directionalControls: [], searchProbes: [], paginationProbes: [] };
+  let interactionProbe = { directionalControls: [], searchProbes: [], paginationProbes: [], discountCodeProbe: null, quantityStepperProbes: [] };
   let checkboxRoundTrip = [];
   if (!config.readOnly) {
-    interactionProbe = await runInteractionProbe(page, url).catch((err) => ({ error: String(err.message || err) }));
+    interactionProbe = await runInteractionProbe(page, url, { documentedDiscountCodes }).catch((err) => ({ error: String(err.message || err) }));
     checkboxRoundTrip = await probeCheckboxRoundTrip(page, url).catch((err) => [{ error: String(err.message || err) }]);
   }
 
@@ -122,7 +164,12 @@ async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia 
   // runs before the crawl so a real order exists for the crawler to discover
   // — earlier than golden facts are normally extracted). Skip the diff rather
   // than crash; those two pages just carry no visual/nav deviation data.
-  const visualDeviations = visualFacts && goldenVisualFacts ? compareToGolden(visualFacts, goldenVisualFacts) : [];
+  // Image aspect-ratio issues need no golden reference at all, so they apply
+  // regardless (README Recommendations Further Improvement #9).
+  const visualDeviations = [
+    ...(visualFacts && goldenVisualFacts ? compareToGolden(visualFacts, goldenVisualFacts) : []),
+    ...imageAspectRatioDeviations(visualFacts),
+  ];
   const navDeviations = nav && goldenNav ? compareNavToGolden(nav, goldenNav) : [];
 
   if (screenshot) bundle.writePageFile(slug, "screenshot-full.png", screenshot);
@@ -157,6 +204,11 @@ async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia 
     navDeviationsFromGolden: navDeviations,
     formValidationFindings: formProbe,
     interactionProbeFindings: { ...interactionProbe, checkboxRoundTrip },
+    // README Recommendations Further Improvement #6: any scanner action taken
+    // purely to shape evidence for THIS page's capture (not because the
+    // checklist called for it), so the AI review prompt can discount
+    // observations that trace back to one rather than treating them as organic.
+    scaffoldingActionsThisSession: scaffoldingActions,
     evidenceFiles: {
       screenshot: `pages/${slug}/screenshot-full.png`,
       domSnapshot: `pages/${slug}/dom-snapshot.html`,
@@ -167,9 +219,33 @@ async function capturePageEvidence(page, { url, variantUrls = [url], reachedVia 
   return manifest;
 }
 
+/**
+ * Pulls plausible discount/coupon/promo/voucher code tokens out of the app
+ * description, so the discount-code prober (README Recommendations Further
+ * Improvement #1) can try real, documented codes rather than only ever
+ * proving a code gets rejected. Generic text-pattern extraction (a backtick-
+ * or quote-wrapped token on a line that also mentions discount/coupon/promo/
+ * voucher) — not tied to any one app's wording — so it degrades to an empty
+ * list, and the prober's invalid-code check alone, on any app description
+ * that doesn't document codes this way.
+ */
+function extractDocumentedCodes(appDescriptionText) {
+  const codes = new Set();
+  const relevantLines = appDescriptionText.split("\n").filter((line) => /discount|coupon|promo|voucher/i.test(line));
+  const tokenPattern = /[`"']([A-Z][A-Z0-9-]{2,15})[`"']/g;
+  for (const line of relevantLines) {
+    let match;
+    while ((match = tokenPattern.exec(line)) !== null) {
+      codes.add(match[1]);
+    }
+  }
+  return [...codes];
+}
+
 export async function runScan(config) {
   const runDir = path.join(__dirname, "..", "runs", config.runId);
   const bundle = new EvidenceBundle(runDir);
+  const documentedDiscountCodes = extractDocumentedCodes(fs.readFileSync(config.appDescPath, "utf-8"));
 
   const browser = await chromium.launch();
   const contextOptions = { viewport: { width: 1280, height: 900 } };
@@ -204,8 +280,9 @@ export async function runScan(config) {
     console.log(`[scan] running checkout/wizard-flow walkthrough (this mutates state on the target site) ...`);
     const walkthroughPage = await context.newPage();
     checkoutWalkthroughResult = await runCheckoutWalkthrough(walkthroughPage, config.baseUrl, {
-      capturePageEvidence: (page, record) => capturePageEvidence(page, record, { bundle, config, goldenVisualFacts: null, goldenNav: null }),
-    }).catch((err) => ({ steps: [{ step: "walkthrough", failed: true, reason: String(err.message || err) }], reachedPages: [] }));
+      capturePageEvidence: (page, record) =>
+        capturePageEvidence(page, record, { bundle, config, goldenVisualFacts: null, goldenNav: null, documentedDiscountCodes }),
+    }).catch((err) => ({ steps: [{ step: "walkthrough", failed: true, reason: String(err.message || err) }], reachedPages: [], scaffoldingActions: [] }));
     await walkthroughPage.close();
     bundle.writeJson("checkout-walkthrough.json", checkoutWalkthroughResult);
   }
@@ -240,9 +317,14 @@ export async function runScan(config) {
   const dedupedPages = dedupePagesByPathname(crawlResult.pages);
   console.log(`[scan] ${crawlResult.pages.length} URLs crawled, deduped to ${dedupedPages.length} distinct templates for the evidence/AI pass`);
 
+  const scaffoldingActions = checkoutWalkthroughResult.scaffoldingActions || [];
+
   for (const pageRecord of dedupedPages) {
     const { url } = pageRecord;
-    console.log(`[scan] page: ${url}${pageRecord.reachedVia === "client-side-navigation" ? " (SPA-routed, reached via click-path replay)" : ""}`);
+    console.log(
+      `[scan] page: ${url}${pageRecord.reachedVia === "client-side-navigation" ? " (SPA-routed, reached via click-path replay)" : ""}` +
+        (pageRecord.sampledAsSecondInstance ? " (second sampled instance of this template)" : "")
+    );
     const page = await context.newPage();
 
     let navError = null;
@@ -255,7 +337,7 @@ export async function runScan(config) {
     const manifest = await capturePageEvidence(
       page,
       { url, variantUrls: pageRecord.variantUrls, reachedVia: pageRecord.reachedVia || "direct-nav" },
-      { bundle, config, goldenVisualFacts, goldenNav }
+      { bundle, config, goldenVisualFacts, goldenNav, documentedDiscountCodes, scaffoldingActions }
     );
     manifest.navError = navError;
     bundle.writePageJson(manifest.slug, "manifest.json", manifest); // re-write with the real navError now known
